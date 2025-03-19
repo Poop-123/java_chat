@@ -1,6 +1,9 @@
 package com.easychat.service;
 
 import java.util.List;
+import java.util.Map;
+
+import com.easychat.dto.TokenUserInfoDto;
 import com.easychat.entity.po.UserInfo;
 import com.easychat.exception.BusinessException;
 import com.easychat.query.UserInfoQuery;
@@ -75,5 +78,10 @@ public interface UserInfoService{
 	/**
 	 * 注册
 	 */
-	void register(String email,String nickName,String password) throws BusinessException;
+	void register(String email, String nickName, String password) throws BusinessException;
+	/**
+	 * 登录
+	 */
+	TokenUserInfoDto login(String email, String password) throws BusinessException;
+
 }
