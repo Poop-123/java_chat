@@ -1,6 +1,8 @@
 package com.easychat.service;
 
 import java.util.Date;
+
+import com.easychat.exception.BusinessException;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.easychat.enums.DateTimePatternEnum;
@@ -10,6 +12,7 @@ import java.util.List;
 import com.easychat.entity.po.GroupInfo;
 import com.easychat.query.GroupInfoQuery;
 import com.easychat.entity.vo.PaginationResultVO;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
   * @Description: Service
@@ -62,5 +65,9 @@ public interface GroupInfoService{
 	 * 根据GroupId删除
 	 */
 	Integer deleteGroupInfoByGroupId(String groupId);
+	/**
+	 * 保存群组
+	 */
+	void saveGroup(GroupInfo groupInfo, MultipartFile avatarFile,MultipartFile avatarCover) throws BusinessException;
 
 }

@@ -1,9 +1,18 @@
 package com.easychat.controller;
+import com.easychat.dto.TokenUserInfoDto;
+import com.easychat.entity.constants.Constants;
 import com.easychat.enums.ResponseCodeEnum;
 import com.easychat.entity.vo.ResponseVO;
+import com.easychat.exception.BusinessException;
+import com.easychat.redis.RedisUtils;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 
 public class ABaseController {
+    @Resource
+    private RedisUtils redisUtils;
     protected static final String STATIC_SUCCESS="success";
     protected static final String STATIC_ERROR="error";
     protected <T>ResponseVO getSuccessResponseVO(T t){
@@ -13,6 +22,32 @@ public class ABaseController {
         responseVO.setInfo(ResponseCodeEnum.CODE_200.getMsg());
         responseVO.setData(t);
         return responseVO;
+    }
+    protected <T> ResponseVO getBusinessErrorResponseVO(BusinessException e,T t){
+        ResponseVO vo=new ResponseVO();
+        vo.setStatus(STATIC_ERROR);
+        if(e.getCode()==null){
+            vo.setCode(ResponseCodeEnum.CODE_600.getCode());
+        }
+        else{
+            vo.setCode(e.getCode());
+        }
+        vo.setInfo(e.getMessage());
+        vo.setData(t);
+        return vo;
+    }
+    protected <T> ResponseVO getServerErrorResponseVO(T t){
+        ResponseVO vo=new ResponseVO();
+        vo.setStatus(STATIC_ERROR);
+        vo.setCode(ResponseCodeEnum.CODE_500.getCode());
+        vo.setInfo(ResponseCodeEnum.CODE_500.getMsg());
+        vo.setData(t);
+        return vo;
+    }
+    protected TokenUserInfoDto getTokenUserInfoDto(HttpServletRequest request){
+        String token=request.getHeader("token");
+        TokenUserInfoDto tokenUserInfoDto=(TokenUserInfoDto)redisUtils.get(Constants.REDIS_KEY_WS_TOKEN+token);
+        return tokenUserInfoDto;
     }
 }
 
