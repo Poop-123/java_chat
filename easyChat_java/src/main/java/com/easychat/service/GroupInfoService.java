@@ -1,5 +1,6 @@
 package com.easychat.service;
 
+import java.io.IOException;
 import java.util.Date;
 
 import com.easychat.exception.BusinessException;
@@ -68,6 +69,6 @@ public interface GroupInfoService{
 	/**
 	 * 保存群组
 	 */
-	void saveGroup(GroupInfo groupInfo, MultipartFile avatarFile,MultipartFile avatarCover) throws BusinessException;
+	void saveGroup(GroupInfo groupInfo, MultipartFile avatarFile,MultipartFile avatarCover) throws BusinessException, IOException;
 
 }

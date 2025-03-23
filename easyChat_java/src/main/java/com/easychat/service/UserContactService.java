@@ -1,6 +1,11 @@
 package com.easychat.service;
 
 import java.util.Date;
+
+import com.easychat.dto.TokenUserInfoDto;
+import com.easychat.dto.UserContactSearchResultDto;
+import com.easychat.enums.UserContactStatusEnum;
+import com.easychat.exception.BusinessException;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.easychat.enums.DateTimePatternEnum;
@@ -62,5 +67,17 @@ public interface UserContactService{
 	 * 根据UserIdAndContactId删除
 	 */
 	Integer deleteUserContactByUserIdAndContactId(String userId,String contactId);
+	/**
+	 * 搜索用户
+	 */
+	UserContactSearchResultDto searchContact(String userId,String contactId);
+	/**
+	 * 好友申请
+	 */
+	Integer applyAdd(TokenUserInfoDto tokenUserInfoDto,String contactId,String applyInfo) throws BusinessException;
+	/**
+	 * 删除或拉黑联系人
+	 */
+	void removeUserContact(String userId, String contactId, UserContactStatusEnum status);
 
 }

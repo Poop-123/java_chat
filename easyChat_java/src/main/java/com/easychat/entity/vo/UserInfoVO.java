@@ -11,7 +11,7 @@ public class UserInfoVO implements Serializable {
     /**
      * 昵称
      */
-    private String nickname;
+    private String nickName;
     /**
      * 性别
      */
@@ -26,7 +26,7 @@ public class UserInfoVO implements Serializable {
     private String areaName;
     private String token;
     private Boolean admin;
-    private String contactStatus;
+    private Integer contactStatus;
 
     public String getUserId() {
         return userId;
@@ -36,12 +36,12 @@ public class UserInfoVO implements Serializable {
         this.userId = userId;
     }
 
-    public String getNickname() {
-        return nickname;
+    public String getNickName() {
+        return nickName;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public void setNickName(String nickname) {
+        this.nickName = nickname;
     }
 
     public Integer getSex() {
@@ -100,11 +100,11 @@ public class UserInfoVO implements Serializable {
         this.admin = admin;
     }
 
-    public String getContactStatus() {
+    public Integer getContactStatus() {
         return contactStatus;
     }
 
-    public void setContactStatus(String contactStatus) {
+    public void setContactStatus(Integer contactStatus) {
         this.contactStatus = contactStatus;
     }
 

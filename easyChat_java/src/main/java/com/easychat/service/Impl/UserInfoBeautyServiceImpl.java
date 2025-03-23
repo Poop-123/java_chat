@@ -1,5 +1,13 @@
 package com.easychat.service.Impl;
 
+import com.easychat.entity.po.UserInfo;
+import com.easychat.enums.BeautyAccountStatusEnum;
+import com.easychat.enums.ResponseCodeEnum;
+import com.easychat.exception.BusinessException;
+import com.easychat.mapper.UserInfoMapper;
+import com.easychat.query.UserInfoQuery;
+import com.easychat.service.UserInfoService;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import com.easychat.entity.po.UserInfoBeauty;
 import com.easychat.query.UserInfoBeautyQuery;
@@ -13,13 +21,15 @@ import com.easychat.query.SimplePage;
 /**
   * @Description: Service
   * @Author:刘耿豪
-  * @Date:2025/03/18
+  * @Date:2025/03/23
   */
 @Service
 public class UserInfoBeautyServiceImpl implements UserInfoBeautyService{
 
 	@Resource
 	private UserInfoBeautyMapper<UserInfoBeauty,UserInfoBeautyQuery> userInfoBeautyMapper;
+	@Resource
+	private UserInfoMapper<UserInfo, UserInfoQuery> userInfoMapper;
 	/**
 	 * 根据条件查询列表
 	 */
@@ -74,23 +84,44 @@ public class UserInfoBeautyServiceImpl implements UserInfoBeautyService{
 	}
 
 	/**
+	 * 根据Id查询对象
+	 */
+	public UserInfoBeauty getUserInfoBeautyById(Integer id){
+		return this.userInfoBeautyMapper.selectById(id);
+	}
+
+	/**
+	 * 根据Id修改
+	 */
+	public Integer updateUserInfoBeautyById(UserInfoBeauty bean,Integer id){
+		return this.userInfoBeautyMapper.updateById(bean,id);
+	}
+
+	/**
+	 * 根据Id删除
+	 */
+	public Integer deleteUserInfoBeautyById(Integer id){
+		return this.userInfoBeautyMapper.deleteById(id);
+	}
+
+	/**
 	 * 根据UserId查询对象
 	 */
-	public UserInfoBeauty getUserInfoBeautyByUserId(Integer userId){
+	public UserInfoBeauty getUserInfoBeautyByUserId(String userId){
 		return this.userInfoBeautyMapper.selectByUserId(userId);
 	}
 
 	/**
 	 * 根据UserId修改
 	 */
-	public Integer updateUserInfoBeautyByUserId(UserInfoBeauty bean,Integer userId){
+	public Integer updateUserInfoBeautyByUserId(UserInfoBeauty bean,String userId){
 		return this.userInfoBeautyMapper.updateByUserId(bean,userId);
 	}
 
 	/**
 	 * 根据UserId删除
 	 */
-	public Integer deleteUserInfoBeautyByUserId(Integer userId){
+	public Integer deleteUserInfoBeautyByUserId(String userId){
 		return this.userInfoBeautyMapper.deleteByUserId(userId);
 	}
 
@@ -113,6 +144,45 @@ public class UserInfoBeautyServiceImpl implements UserInfoBeautyService{
 	 */
 	public Integer deleteUserInfoBeautyByEmail(String email){
 		return this.userInfoBeautyMapper.deleteByEmail(email);
+	}
+	@Override
+	public void saveAccount(UserInfoBeauty beauty) throws BusinessException {
+		if(beauty.getId()!=null){
+			UserInfoBeauty dbInfo=this.userInfoBeautyMapper.selectById(beauty.getId());
+			if(BeautyAccountStatusEnum.USERD.getStatus().equals(dbInfo.getStatus())){
+				throw new BusinessException(ResponseCodeEnum.CODE_600);
+			}
+		}
+		UserInfoBeauty dbInfo=this.userInfoBeautyMapper.selectByEmail(beauty.getEmail());
+		if(beauty.getId()==null&&dbInfo!=null){
+			throw new BusinessException("靓号邮箱已经存在！");
+		}
+		if(beauty.getId()!=null&&dbInfo!=null&&dbInfo.getId()!=null&&!beauty.getId().equals(dbInfo.getId())){
+			throw new BusinessException("靓号邮箱已经存在！");
+		}
+		dbInfo=this.userInfoBeautyMapper.selectByUserId(beauty.getUserId());
+		if(beauty.getId()==null&&dbInfo!=null){
+			throw new BusinessException("靓号已经存在！");
+		}
+		if(beauty.getId()!=null&&dbInfo!=null&&dbInfo.getId()!=null&&!beauty.getId().equals(dbInfo.getId())){
+			throw new BusinessException("靓号已经存在！");
+		}
+		UserInfo userInfo=this.userInfoMapper.selectByEmail(beauty.getEmail());
+		if(userInfo!=null){
+			throw new BusinessException("靓号邮箱已经被注册！");
+		}
+		userInfo=this.userInfoMapper.selectByUserId(beauty.getUserId());
+		if(userInfo!=null){
+			throw new BusinessException("靓号已被注册！");
+		}
+		if(beauty.getId()!=null){
+			this.userInfoBeautyMapper.updateById(beauty,beauty.getId());
+		}
+		else{
+			beauty.setStatus(BeautyAccountStatusEnum.NO_USER.getStatus());
+			this.userInfoBeautyMapper.insert(beauty);
+		}
+
 	}
 
 }

@@ -48,9 +48,59 @@ public class UserContactQuery extends BaseQuery{
 	 */
 	 private Date lastUpdateTime;
 
-	 private String lastUpdateTimeStart;
+	 private Boolean queryUserInfo;
+
+	 private Boolean queryContactUserInfo;
+
+ 	 private Boolean queryGroupInfo;
+
+	 private Boolean excludeMyOwnGroup;
+
+	 private Integer[] statusArray;
+
+	private String lastUpdateTimeStart;
 
 	 private String lastUpdateTimeEnd;
+
+	public Boolean getQueryUserInfo() {
+		return queryUserInfo;
+	}
+
+	public Boolean getQueryGroupInfo() {
+		return queryGroupInfo;
+	}
+
+	public Boolean getQueryContactUserInfo() {
+		return queryContactUserInfo;
+	}
+
+	public Integer[] getStatusArray() {
+		return statusArray;
+	}
+
+	public void setStatusArray(Integer[] statusArray) {
+		this.statusArray = statusArray;
+	}
+
+	public void setQueryContactUserInfo(Boolean queryContactUserInfo) {
+		this.queryContactUserInfo = queryContactUserInfo;
+	}
+
+	public void setQueryGroupInfo(Boolean queryGroupInfo) {
+		this.queryGroupInfo = queryGroupInfo;
+	}
+
+	public Boolean getExcludeMyOwnGroup() {
+		return excludeMyOwnGroup;
+	}
+
+	public void setExcludeMyOwnGroup(Boolean excludeMyOwnGroup) {
+		this.excludeMyOwnGroup = excludeMyOwnGroup;
+	}
+
+	public void setQueryUserInfo(Boolean queryUserInfo) {
+		this.queryUserInfo = queryUserInfo;
+	}
 
 	public void setUserId(String userId){
 		this.userId=userId;
@@ -124,5 +174,6 @@ public class UserContactQuery extends BaseQuery{
 	public String getLastUpdateTimeEnd(){
 		return this.lastUpdateTimeEnd;
 	}
+
 
 }

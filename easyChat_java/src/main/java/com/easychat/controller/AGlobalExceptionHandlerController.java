@@ -20,7 +20,8 @@ public class AGlobalExceptionHandlerController extends ABaseController {
     private static final Logger logger= LoggerFactory.getLogger(AGlobalExceptionHandlerController.class);
     @ExceptionHandler(value = Exception.class)
     Object handleException(Exception e, HttpServletRequest request){
-        logger.error("请求错误，请求地址{}，错误信息：{}",request.getRequestURI(),e);
+        e.printStackTrace();
+        logger.error("请求错误，请求地址{}，错误信息"+e,request.getRequestURI());
         ResponseVO ajaxResponse =new ResponseVO();
         //404
         if(e instanceof NoHandlerFoundException){

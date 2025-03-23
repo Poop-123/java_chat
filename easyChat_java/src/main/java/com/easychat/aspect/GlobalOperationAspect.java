@@ -51,14 +51,18 @@ public class GlobalOperationAspect {
         HttpServletRequest request= ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
         String token=request.getHeader("token");
         if(null==token){
+            logger.error("没有token消息");
             throw new BusinessException(ResponseCodeEnum.CODE_901);
 
         }
-        TokenUserInfoDto tokenUserInfoDto=(TokenUserInfoDto) redisUtils.get(Constants.REDIS_KEY_WS_TOKEN);
+        TokenUserInfoDto tokenUserInfoDto=(TokenUserInfoDto) redisUtils.get(Constants.REDIS_KEY_WS_TOKEN+token);
         if(tokenUserInfoDto==null){
+            logger.error("redis中没有token消息");
+
             throw new BusinessException(ResponseCodeEnum.CODE_901);
         }
-        if(checkAdmin&&tokenUserInfoDto.getAdmin()){
+        if(checkAdmin&&!tokenUserInfoDto.getAdmin()){
+            System.out.println("你不是管理员");
             throw new BusinessException(ResponseCodeEnum.CODE_404);
         }
     }

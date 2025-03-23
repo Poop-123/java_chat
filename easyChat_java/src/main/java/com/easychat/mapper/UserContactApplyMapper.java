@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 /**
   * @Description:用户联系人表
   * @Author:刘耿豪
-  * @Date:2025/03/19
+  * @Date:2025/03/22
   */
 public interface UserContactApplyMapper<T,P> extends BaseMapper{
 	/**
@@ -24,4 +24,20 @@ public interface UserContactApplyMapper<T,P> extends BaseMapper{
 	 */
 	 Integer deleteByApplyId(@Param("applyId") Integer applyId);
 
+	/**
+	 * 根据ApplyUserIdAndReceiveUserIdAndContactId查询
+	 */
+	 T selectByApplyUserIdAndReceiveUserIdAndContactId(@Param("applyUserId") String applyUserId, @Param("receiveUserId") String receiveUserId, @Param("contactId") String contactId);
+
+	/**
+	 * 根据ApplyUserIdAndReceiveUserIdAndContactId更新
+	 */
+	 Integer updateByApplyUserIdAndReceiveUserIdAndContactId(@Param("bean") T t, @Param("applyUserId") String applyUserId, @Param("receiveUserId") String receiveUserId, @Param("contactId") String contactId);
+
+	/**
+	 * 根据ApplyUserIdAndReceiveUserIdAndContactId删除
+	 */
+	 Integer deleteByApplyUserIdAndReceiveUserIdAndContactId(@Param("applyUserId") String applyUserId, @Param("receiveUserId") String receiveUserId, @Param("contactId") String contactId);
+
+	Integer updateByParam(@Param("bean") T updateInfo, @Param("query") P userContactApplyQuery);
 }

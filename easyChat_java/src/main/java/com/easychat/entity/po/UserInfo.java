@@ -25,7 +25,7 @@ public class UserInfo implements Serializable{
 	 private String email;
 
 	/**
-	 * 
+	 * 昵称
 	 */
 	 private String nickName;
 

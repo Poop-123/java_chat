@@ -1,27 +1,43 @@
 package com.easychat.mapper;
 
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
   * @Description:
   * @Author:刘耿豪
-  * @Date:2025/03/18
+  * @Date:2025/03/23
   */
 public interface UserInfoBeautyMapper<T,P> extends BaseMapper{
 	/**
+	 * 根据Id查询
+	 */
+	 T selectById(@Param("id") Integer id);
+
+	/**
+	 * 根据Id更新
+	 */
+	 Integer updateById(@Param("bean") T t, @Param("id") Integer id);
+
+	/**
+	 * 根据Id删除
+	 */
+	 Integer deleteById(@Param("id") Integer id);
+
+	/**
 	 * 根据UserId查询
 	 */
-	 T selectByUserId(@Param("userId") Integer userId);
+	 T selectByUserId(@Param("userId") String userId);
 
 	/**
 	 * 根据UserId更新
 	 */
-	 Integer updateByUserId(@Param("bean") T t, @Param("userId") Integer userId);
+	 Integer updateByUserId(@Param("bean") T t, @Param("userId") String userId);
 
 	/**
 	 * 根据UserId删除
 	 */
-	 Integer deleteByUserId(@Param("userId") Integer userId);
+	 Integer deleteByUserId(@Param("userId") String userId);
 
 	/**
 	 * 根据Email查询

@@ -1,5 +1,7 @@
 package com.easychat.service.Impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 
 import com.easychat.config.AppConfig;
@@ -123,10 +125,11 @@ public class GroupInfoServiceImpl implements GroupInfoService{
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void saveGroup(GroupInfo groupInfo, MultipartFile avatarFile, MultipartFile avatarCover) throws BusinessException {
+	public void saveGroup(GroupInfo groupInfo, MultipartFile avatarFile, MultipartFile avatarCover) throws BusinessException, IOException {
         Date curDate=new Date();
 		//新增
 		if(StringTools.isEmpty(groupInfo.getGroupId())){
+			System.out.println("1111111111");
 			 GroupInfoQuery groupInfoQuery=new GroupInfoQuery();
 			 groupInfoQuery.setGroupOwnerId(groupInfo.getGroupOwnerId());
 			 Integer count=this.groupInfoMapper.selectCount(groupInfoQuery);
@@ -147,12 +150,14 @@ public class GroupInfoServiceImpl implements GroupInfoService{
 			userContact.setContactId(groupInfo.getGroupId());
 			userContact.setUserId(groupInfo.getGroupOwnerId());
 			userContact.setCreateTime(curDate);
+			userContact.setLastUpdateTime(curDate);
 			//TODO 创建会话
 			//TODO 发送消息(欢迎)
 			this.userContactMapper.insert(userContact);
 		 }
 		//修改
 		else {
+
 			GroupInfo dbInfo=this.groupInfoMapper.selectByGroupId(groupInfo.getGroupId());
 			//不是群主
 			if(!dbInfo.getGroupOwnerId().equals(groupInfo.getGroupOwnerId())){
@@ -166,6 +171,17 @@ public class GroupInfoServiceImpl implements GroupInfoService{
 			return;
 		}
 		String baseFolder=appConfig.getProjectFolder()+ Constants.FILE_FOLDER_FILE;
+		File targetFileFolder=new File(baseFolder+Constants.FILE_FOLDER_AVATAR_NAME);
+		if(!targetFileFolder.exists()){
+
+			targetFileFolder.mkdirs();
+		}
+		System.out.println(targetFileFolder.getPath());
+		String filePath=targetFileFolder.getPath()+"/"+groupInfo.getGroupId()+Constants.IMAGE_SUFFIX;
+		File avatarFilePath=new File(filePath);
+		avatarFile.transferTo(avatarFilePath);//写入磁盘
+		File avatarCoverPath=new File(filePath+Constants.COVER_IMAGE_SUFFIX);
+		avatarCover.transferTo(avatarCoverPath);
 	}
 
 }

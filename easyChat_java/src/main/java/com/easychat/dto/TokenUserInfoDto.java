@@ -6,7 +6,7 @@ public class TokenUserInfoDto implements Serializable {
     private static final long serialVersionUID=-3323134234234242L;
     private String token;
     private String userId;
-    private String nickname;
+    private String nickName;
     private Boolean admin;
 
     public String getToken() {
@@ -25,12 +25,12 @@ public class TokenUserInfoDto implements Serializable {
         this.userId = userId;
     }
 
-    public String getNickname() {
-        return nickname;
+    public String getNickName() {
+        return nickName;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public void setNickName(String nickname) {
+        this.nickName = nickname;
     }
 
     public Boolean getAdmin() {

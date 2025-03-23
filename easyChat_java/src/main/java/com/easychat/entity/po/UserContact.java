@@ -28,14 +28,20 @@ public class UserContact implements Serializable{
 	 * 联系人类型 0:好友 1:群组
 	 */
 	 private Integer contactType;
-
+	/**
+	 * 联系人名称
+	 */
+	private String contactName;
 	/**
 	 * 创建时间
 	 */
 	 @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	 @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	 private Date createTime;
-
+	/**
+	 * 性别
+	 */
+	 private Integer sex;
 	/**
 	 * 状态 0:非好友 1:好友 2:已删除好友 3：被好友删除 4:拉黑好友 5：被好友拉黑
 	 */
@@ -48,6 +54,22 @@ public class UserContact implements Serializable{
 	 @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	 @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	 private Date lastUpdateTime;
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
+
+	public Integer getSex() {
+		return sex;
+	}
+
+	public void setSex(Integer sex) {
+		this.sex = sex;
+	}
 
 	public void setUserId(String userId){
 		this.userId=userId;

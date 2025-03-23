@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -53,7 +54,7 @@ public class AccountController extends ABaseController{
     }
     //注册
     @PostMapping("/register")
-    ResponseVO register(@NotEmpty String checkCodeKey, @NotEmpty @Email  String email, @NotEmpty String password, @NotEmpty String nickName, @NotEmpty String checkCode){
+    ResponseVO register(@NotEmpty String checkCodeKey, @NotEmpty @Email  String email, @NotEmpty @Pattern(regexp = Constants.REGEX_PASSWORD)String password, @NotEmpty String nickName, @NotEmpty String checkCode){
         try{
            if(!checkCode.equals(redisUtils.get(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey))){
                throw new BusinessException("图片验证码不正确！");

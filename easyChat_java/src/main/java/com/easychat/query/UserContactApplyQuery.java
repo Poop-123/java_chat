@@ -4,7 +4,7 @@ package com.easychat.query;
 /**
   * @Description:用户联系人表
   * @Author:刘耿豪
-  * @Date:2025/03/19
+  * @Date:2025/03/22
   */
 public class UserContactApplyQuery extends BaseQuery{
 	/**
@@ -42,7 +42,10 @@ public class UserContactApplyQuery extends BaseQuery{
 	 * 最后申请时间
 	 */
 	 private Long lastApplyTime;
-
+	/**
+	 * 是否关联查询
+	 */
+	private Boolean queryContactInfo;
 	/**
 	 * 状态 0:待处理 1:已同意 2:已拒绝 3:已拉黑
 	 */
@@ -54,6 +57,14 @@ public class UserContactApplyQuery extends BaseQuery{
 	 private String applyInfo;
 
 	 private String applyInfoFuzzy;
+
+	public Boolean getQueryContactInfo() {
+		return queryContactInfo;
+	}
+
+	public void setQueryContactInfo(Boolean queryContactInfo) {
+		this.queryContactInfo = queryContactInfo;
+	}
 
 	public void setApplyId(Integer applyId){
 		this.applyId=applyId;

@@ -1,5 +1,7 @@
 package com.easychat.service.Impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +28,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Service;
 import com.easychat.query.SimplePage;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
   * @Description: Service
@@ -202,10 +205,49 @@ public class UserInfoServiceImpl implements UserInfoService{
         redisComponent.saveTokenUserInfoDto(tokenUserInfoDto);
 		return tokenUserInfoDto;
 	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void updateUserInfo(UserInfo userInfo, MultipartFile avatarFile, MultipartFile avtarCover) throws IOException {
+           if(avatarFile!=null){
+			   String baseFolder=appConfig.getProjectFolder()+Constants.FILE_FOLDER_FILE;
+			   File targetFileFolder=new File(baseFolder+Constants.FILE_FOLDER_AVATAR_NAME);
+			   if(!targetFileFolder.exists()){
+				   targetFileFolder.mkdirs();
+			   }
+			   String filePath=targetFileFolder.getPath()+"/"+userInfo.getUserId()+Constants.IMAGE_SUFFIX;
+		       avatarFile.transferTo(new File(filePath));
+		   }
+		   UserInfo dbInfo=this.userInfoMapper.selectByUserId(userInfo.getUserId());
+		   this.userInfoMapper.updateByUserId(userInfo,userInfo.getUserId());
+		   String contactNameUpdate=null;
+		   if(dbInfo.getNickName().equals(userInfo.getNickName())){
+			   contactNameUpdate=userInfo.getNickName();
+		   }
+		   //TODO 更新会话中的昵称信息
+	}
+
+	@Override
+	public void updateUserStatus(Integer status, String userId) throws BusinessException {
+		UserStatusEnum userStatusEnum=UserStatusEnum.getByStatus(status);
+		if(userStatusEnum==null){
+			throw new BusinessException("状态异常！");
+		}
+		UserInfo userInfo=new UserInfo();
+		userInfo.setStatus(userStatusEnum.getStatus());
+		this.userInfoMapper.updateByUserId(userInfo,userId);
+	}
+
+	@Override
+	public void forceOffLine(String userId) {
+       //TODO 强制下线
+
+	}
+
 	private TokenUserInfoDto getTokenUserInfoDto(UserInfo userInfo){
 		TokenUserInfoDto tokenUserInfoDto=new TokenUserInfoDto();
 		tokenUserInfoDto.setUserId(userInfo.getUserId());
-		tokenUserInfoDto.setNickname(userInfo.getUserId());
+		tokenUserInfoDto.setNickName(userInfo.getNickName());
 		String adminEmails=appConfig.getAdminEmails();
 		if(!StringTools.isEmpty(adminEmails)&& ArrayUtils.contains(adminEmails.split(","),userInfo.getEmail())){
 			tokenUserInfoDto.setAdmin(true);
