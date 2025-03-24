@@ -39,6 +39,33 @@ public class GroupInfoQuery extends BaseQuery{
 	 private String createTimeStart;
 
 	 private String createTimeEnd;
+     private String groupOwnerNickName;
+	 private boolean queryGroupOwnerName;
+	 private boolean queryMemberCount;
+
+	public String getGroupOwnerNickName() {
+		return groupOwnerNickName;
+	}
+
+	public void setGroupOwnerNickName(String groupOwnerNickName) {
+		this.groupOwnerNickName = groupOwnerNickName;
+	}
+
+	public boolean isQueryGroupOwnerName() {
+		return queryGroupOwnerName;
+	}
+
+	public void setQueryGroupOwnerName(boolean queryGroupOwnerName) {
+		this.queryGroupOwnerName = queryGroupOwnerName;
+	}
+
+	public boolean isQueryMemberCount() {
+		return queryMemberCount;
+	}
+
+	public void setQueryMemberCount(boolean queryMemberCount) {
+		this.queryMemberCount = queryMemberCount;
+	}
 
 	/**
 	 * 群公告

@@ -12,6 +12,7 @@ import com.easychat.enums.*;
 import com.easychat.exception.BusinessException;
 import com.easychat.mapper.UserContactMapper;
 import com.easychat.query.UserContactQuery;
+import com.easychat.query.UserInfoQuery;
 import com.easychat.redis.RedisComponent;
 import com.easychat.utils.StringTools;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -183,5 +184,25 @@ public class GroupInfoServiceImpl implements GroupInfoService{
 		File avatarCoverPath=new File(filePath+Constants.COVER_IMAGE_SUFFIX);
 		avatarCover.transferTo(avatarCoverPath);
 	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void dissolutionGroup(String groupOwnerId, String groupId) throws BusinessException {
+           GroupInfo dbInfo=this.groupInfoMapper.selectByGroupId(groupId);
+		   if(null==dbInfo||!dbInfo.getGroupOwnerId().equals(groupOwnerId)){
+			   throw new BusinessException(ResponseCodeEnum.CODE_600);
+		   }
+		   GroupInfo updateInfo=new GroupInfo();
+		   updateInfo.setStatus(GroupStatusEnum.DISSOLUTION.getStatus());
+		   this.groupInfoMapper.updateByGroupId(updateInfo,groupId);
+		UserContactQuery userContactQuery=new UserContactQuery();
+		userContactQuery.setContactId(groupId);
+		userContactQuery.setContactType(UserContactTypeEnum.GROUP.getType());
+		UserContact updateUserContact=new UserContact();
+		updateUserContact.setStatus(UserContactStatusEnum.DEL.getStatus());
+		this.userContactMapper.updateByParam(updateUserContact,userContactQuery);
+		//TODO 移除相关群员的联系人缓存
+        //TODO 发消息 1.更新会话信息 2.记录群消息 3。发送解散通知消息
+     	}
 
 }
