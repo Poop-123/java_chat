@@ -6,15 +6,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.easychat.config.AppConfig;
 import com.easychat.dto.TokenUserInfoDto;
 import com.easychat.entity.constants.Constants;
+import com.easychat.entity.po.UserContact;
 import com.easychat.entity.po.UserInfo;
 import com.easychat.entity.po.UserInfoBeauty;
 import com.easychat.enums.*;
 import com.easychat.exception.BusinessException;
+import com.easychat.mapper.UserContactMapper;
 import com.easychat.mapper.UserInfoBeautyMapper;
+import com.easychat.query.UserContactQuery;
 import com.easychat.query.UserInfoBeautyQuery;
 import com.easychat.query.UserInfoQuery;
 import com.easychat.entity.vo.PaginationResultVO;
@@ -25,6 +29,7 @@ import javax.annotation.Resource;
 
 import com.easychat.utils.StringTools;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.easychat.query.SimplePage;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +50,8 @@ public class UserInfoServiceImpl implements UserInfoService{
 	private UserInfoBeautyMapper <UserInfoBeauty,UserInfoQuery> userInfoBeautyMapper;
 	@Resource
 	private RedisComponent redisComponent;
-
+    @Autowired
+    private UserContactMapper userContactMapper;
 
 
 	/**
@@ -193,7 +199,17 @@ public class UserInfoServiceImpl implements UserInfoService{
 		}
 
         //TODO 查询我的群组
-		//TODO 查询我的联系人
+		// 查询我的联系人
+		UserContactQuery contactQuery=new UserContactQuery();
+		contactQuery.setUserId(userInfo.getUserId());
+		contactQuery.setStatus(UserContactStatusEnum.FRIEND.getStatus());
+		List<UserContact> contactList=userContactMapper.selectList(contactQuery);
+		List<String> contactIdList=contactList.stream().map(item->item.getContactId()).collect(Collectors.toList());
+
+		redisComponent.cleanUserContact(userInfo.getUserId());
+		if(!contactIdList.isEmpty()){
+			redisComponent.addUserContactBath(userInfo.getUserId(), contactIdList);
+		}
 		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(userInfo);
         //Long lastHeartBeat= redisComponent.getUserHeartBeat(userInfo.getUserId());
 		//if(null!=lastHeartBeat){

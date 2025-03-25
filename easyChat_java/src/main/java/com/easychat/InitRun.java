@@ -30,8 +30,9 @@ public class InitRun implements ApplicationRunner {
         try{
             dataSource.getConnection();
             redisUtils.get("test");
-            nettyWebSocketStarter.startNetty();
-            logger.info("服务启动成功");
+            new Thread(nettyWebSocketStarter).start();
+
+               logger.info("服务启动成功");
         }catch (SQLException e){
             logger.error("数据库配置错误");
         }catch (RedisConnectionException e){
