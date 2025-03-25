@@ -1,5 +1,6 @@
 package com.easychat.websocket.netty;
 
+import com.easychat.config.AppConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -12,14 +13,34 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
-
+@Component
 public class NettyWebSocketStarter {
     private static final Logger logger= LoggerFactory.getLogger(NettyWebSocketStarter.class);
     private static EventLoopGroup bossGroup =new NioEventLoopGroup();
     private static EventLoopGroup workGroup =new NioEventLoopGroup();
-    public static void main(String[] args){
+    @Resource
+    private HandleWebSocket handleWebSocket;
+    @Autowired
+    private AppConfig appConfig;
+
+    @PreDestroy
+    public void close(){
+        bossGroup.shutdownGracefully();
+        workGroup.shutdownGracefully();
+
+    }
+
+
+
+    @Async
+    public void startNetty(){
         try{
             ServerBootstrap serverBootstrap=new ServerBootstrap();
             serverBootstrap.group(bossGroup,workGroup);
@@ -45,12 +66,13 @@ public class NettyWebSocketStarter {
                             //设置心跳处理
                             pipeline.addLast(new HandlerHeartBeat());
                             //将http协议升级为ws协议，对websocket支持
-                            pipeline.addLast(new WebSocketServerProtocolHandler("/ws"));
+                            pipeline.addLast(new WebSocketServerProtocolHandler("/ws",null,true,64*1024,true,true,10000L));
                             //自定义处理器处理各种事务
+                            pipeline.addLast( handleWebSocket);
                         }
                     });
-            ChannelFuture channelFuture= serverBootstrap.bind(5051).sync();
-            logger.info("netty启动成功");
+            ChannelFuture channelFuture= serverBootstrap.bind(appConfig.getWePort()).sync();
+            logger.info("netty启动成功,端口：{}",appConfig.getWePort());
 
             channelFuture.channel().closeFuture().sync();
         }catch (Exception e){
@@ -62,4 +84,5 @@ public class NettyWebSocketStarter {
         }
 
     }
+
 }
