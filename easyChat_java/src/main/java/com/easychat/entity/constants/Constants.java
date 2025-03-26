@@ -1,7 +1,7 @@
 package com.easychat.entity.constants;
 
 import com.easychat.enums.UserContactTypeEnum;
-import com.sun.org.apache.bcel.internal.generic.PUSH;
+
 
 public class Constants {
     public static final Integer  LENGTH_11=11;

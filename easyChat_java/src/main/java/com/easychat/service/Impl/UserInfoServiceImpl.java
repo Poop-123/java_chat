@@ -23,6 +23,7 @@ import com.easychat.query.UserInfoBeautyQuery;
 import com.easychat.query.UserInfoQuery;
 import com.easychat.entity.vo.PaginationResultVO;
 import com.easychat.redis.RedisComponent;
+import com.easychat.service.UserContactService;
 import com.easychat.service.UserInfoService;
 import com.easychat.mapper.UserInfoMapper;
 import javax.annotation.Resource;
@@ -50,9 +51,10 @@ public class UserInfoServiceImpl implements UserInfoService{
 	private UserInfoBeautyMapper <UserInfoBeauty,UserInfoQuery> userInfoBeautyMapper;
 	@Resource
 	private RedisComponent redisComponent;
-    @Autowired
+    @Resource
     private UserContactMapper userContactMapper;
-
+	@Resource
+	private UserContactService userContactService;
 
 	/**
 	 * 根据条件查询列表
@@ -184,7 +186,8 @@ public class UserInfoServiceImpl implements UserInfoService{
 				  updateBeauty.setStatus(BeautyAccountStatusEnum.USERD.getStatus());
 				  this.userInfoBeautyMapper.updateByUserId(updateBeauty,beautyAccount.getUserId());
 			  }
-			  //TODO 创建机器人好友
+			  // 创建机器人好友
+		     userContactService.addContact4Robot(userId);
 	}
 
 	@Override

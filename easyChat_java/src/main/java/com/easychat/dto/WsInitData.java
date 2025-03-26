@@ -6,16 +6,18 @@ import com.easychat.entity.po.ChatSessionUser;
 import java.util.List;
 
 public class WsInitData {
-    private List<ChatSessionUser> chatSessionUserList;
+    private List<ChatSessionUser> chatSessionList;
     private List<ChatMessage> chatMessagesList;
     private Integer applyCount;
 
-    public List<ChatSessionUser> getChatSessionUserList() {
-        return chatSessionUserList;
+
+
+    public List<ChatSessionUser> getChatSessionList() {
+        return chatSessionList;
     }
 
-    public void setChatSessionUserList(List<ChatSessionUser> chatSessionUsers) {
-        this.chatSessionUserList = chatSessionUsers;
+    public void setChatSessionList(List<ChatSessionUser> chatSessionUsers) {
+        this.chatSessionList = chatSessionUsers;
     }
 
     public List<ChatMessage> getChatMessagesList() {

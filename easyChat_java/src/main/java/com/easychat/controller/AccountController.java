@@ -57,7 +57,7 @@ public class AccountController extends ABaseController{
     ResponseVO register(@NotEmpty String checkCodeKey, @NotEmpty @Email  String email, @NotEmpty @Pattern(regexp = Constants.REGEX_PASSWORD)String password, @NotEmpty String nickName, @NotEmpty String checkCode){
         try{
            if(!checkCode.equals(redisUtils.get(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey))){
-               throw new BusinessException("图片验证码不正确！");
+               return getBusinessErrorResponseVO(new BusinessException("图片验证码不正确！"),null);
            }
            userInfoService.register(email,nickName,password);
         } catch (Exception e) {

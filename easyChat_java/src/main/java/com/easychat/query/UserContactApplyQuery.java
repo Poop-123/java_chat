@@ -57,9 +57,17 @@ public class UserContactApplyQuery extends BaseQuery{
 	 private String applyInfo;
 
 	 private String applyInfoFuzzy;
-
+     private Long lastApplyTimestamp;
 	public Boolean getQueryContactInfo() {
 		return queryContactInfo;
+	}
+
+	public Long getLastApplyTimestamp() {
+		return lastApplyTimestamp;
+	}
+
+	public void setLastApplyTimestamp(Long lastApplyTimestamp) {
+		this.lastApplyTimestamp = lastApplyTimestamp;
 	}
 
 	public void setQueryContactInfo(Boolean queryContactInfo) {

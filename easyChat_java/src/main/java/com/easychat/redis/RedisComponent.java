@@ -3,6 +3,7 @@ package com.easychat.redis;
 import com.easychat.dto.SysSettingDto;
 import com.easychat.dto.TokenUserInfoDto;
 import com.easychat.entity.constants.Constants;
+import com.easychat.utils.StringTools;
 import org.apache.tomcat.util.bcel.Const;
 import org.springframework.stereotype.Component;
 
@@ -51,6 +52,14 @@ public class RedisComponent {
     }
     //获取联系人
     public List<String> getContactList(String userId){
-        return (List<String>)redisUtils.get(Constants.REDIS_KEY_USER_CONTACT+userId);
+        return (List<String>)redisUtils.getQueueList(Constants.REDIS_KEY_USER_CONTACT+userId);
+    }
+    //清空token信息
+    public void cleanUserTokenByUserId(String userId){
+        String token=(String)redisUtils.get(Constants.REDIS_KEY_WS_TOKEN_USERID+userId);
+        if(StringTools.isEmpty(token)){
+            return ;
+        }
+        redisUtils.delete(token);
     }
 }

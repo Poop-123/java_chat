@@ -79,5 +79,8 @@ public interface UserContactService{
 	 * 删除或拉黑联系人
 	 */
 	void removeUserContact(String userId, String contactId, UserContactStatusEnum status);
-
+	/**
+	 *添加联系人
+	 */
+	void addContact4Robot(String userId);
 }

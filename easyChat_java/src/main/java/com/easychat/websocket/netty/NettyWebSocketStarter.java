@@ -71,6 +71,7 @@ public class NettyWebSocketStarter implements Runnable{
                            pipeline.addLast( handleWebSocket);
                        }
                    });
+           String wsPort=System.getProperty("ws.port");
            ChannelFuture channelFuture= serverBootstrap.bind(appConfig.getWePort()).sync();
            logger.info("netty启动成功,端口：{}",appConfig.getWePort());
 
