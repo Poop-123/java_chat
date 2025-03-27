@@ -23,6 +23,7 @@ import com.easychat.query.UserInfoBeautyQuery;
 import com.easychat.query.UserInfoQuery;
 import com.easychat.entity.vo.PaginationResultVO;
 import com.easychat.redis.RedisComponent;
+import com.easychat.service.ChatSessionUserService;
 import com.easychat.service.UserContactService;
 import com.easychat.service.UserInfoService;
 import com.easychat.mapper.UserInfoMapper;
@@ -55,7 +56,8 @@ public class UserInfoServiceImpl implements UserInfoService{
     private UserContactMapper userContactMapper;
 	@Resource
 	private UserContactService userContactService;
-
+    @Resource
+	private ChatSessionUserService chatSessionUserService;
 	/**
 	 * 根据条件查询列表
 	 */
@@ -240,10 +242,18 @@ public class UserInfoServiceImpl implements UserInfoService{
 		   UserInfo dbInfo=this.userInfoMapper.selectByUserId(userInfo.getUserId());
 		   this.userInfoMapper.updateByUserId(userInfo,userInfo.getUserId());
 		   String contactNameUpdate=null;
-		   if(dbInfo.getNickName().equals(userInfo.getNickName())){
+		   if(!dbInfo.getNickName().equals(userInfo.getNickName())){
 			   contactNameUpdate=userInfo.getNickName();
 		   }
+		   if(contactNameUpdate==null){
+			   return ;
+		   }
+		TokenUserInfoDto tokenUserInfoDto = redisComponent.getTokenUserInfoDtoByUserId(userInfo.getUserId());
+		tokenUserInfoDto.setNickName(contactNameUpdate);
+		   redisComponent.saveTokenUserInfoDto(tokenUserInfoDto);
 		   //TODO 更新会话中的昵称信息
+		   chatSessionUserService.updateRedundancyInfo(contactNameUpdate,userInfo.getUserId());
+
 	}
 
 	@Override

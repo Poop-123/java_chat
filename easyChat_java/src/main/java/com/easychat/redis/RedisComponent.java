@@ -42,6 +42,14 @@ public class RedisComponent {
         redisUtils.set(Constants.REDIS_KEY_SYS_SETTING,sysSettingDto);
 
     }
+    public TokenUserInfoDto getTokenUserInfoDto(String token){
+        TokenUserInfoDto tokenUserInfoDto=(TokenUserInfoDto) redisUtils.get(Constants.REDIS_KEY_WS_TOKEN+token);
+        return tokenUserInfoDto;
+    }
+    public TokenUserInfoDto getTokenUserInfoDtoByUserId(String userId){
+        String token=(String) redisUtils.get(Constants.REDIS_KEY_WS_TOKEN_USERID+userId);
+        return getTokenUserInfoDto(token);
+    }
     //清空联系人
     public void cleanUserContact(String userId){
         redisUtils.delete(Constants.REDIS_KEY_USER_CONTACT+userId);
@@ -49,6 +57,14 @@ public class RedisComponent {
     //批量添加联系人
     public void addUserContactBath(String userId, List<String> contactIdList){
         redisUtils.lpushAll(Constants.REDIS_KEY_USER_CONTACT+userId,contactIdList,Constants.REDIS_KEY_TOKEN_EXPIRES);
+    }
+    //添加联系人
+    public void addUserContact(String userId, String contactId){
+        List<String> contactIdList=getContactList(userId);
+        if(contactIdList.contains(contactId)){
+            return ;
+        }
+        redisUtils.lpush(Constants.REDIS_KEY_USER_CONTACT+userId,contactId,Constants.REDIS_KEY_TOKEN_EXPIRES);
     }
     //获取联系人
     public List<String> getContactList(String userId){

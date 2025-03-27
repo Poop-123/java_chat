@@ -56,5 +56,8 @@ public interface ChatSessionUserService{
 	 * 根据UserIdAndContactId删除
 	 */
 	Integer deleteChatSessionUserByUserIdAndContactId(String userId,String contactId);
-
+	/**
+	 * 修改昵称
+	 */
+	public void updateRedundancyInfo(String contactName,String contactId);
 }

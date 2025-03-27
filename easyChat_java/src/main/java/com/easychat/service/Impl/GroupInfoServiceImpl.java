@@ -5,30 +5,33 @@ import java.io.IOException;
 import java.util.Date;
 
 import com.easychat.config.AppConfig;
+import com.easychat.dto.MessageSendDto;
 import com.easychat.dto.SysSettingDto;
 import com.easychat.entity.constants.Constants;
-import com.easychat.entity.po.UserContact;
+import com.easychat.entity.po.*;
 import com.easychat.enums.*;
 import com.easychat.exception.BusinessException;
-import com.easychat.mapper.UserContactMapper;
-import com.easychat.query.UserContactQuery;
-import com.easychat.query.UserInfoQuery;
+import com.easychat.mapper.*;
+import com.easychat.query.*;
 import com.easychat.redis.RedisComponent;
+import com.easychat.service.ChatSessionService;
+import com.easychat.service.ChatSessionUserService;
+import com.easychat.utils.CopyTools;
 import com.easychat.utils.StringTools;
+import com.easychat.websocket.ChannelContextUitls;
+import com.easychat.websocket.MessageHandler;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.easychat.utils.DateUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
-import com.easychat.entity.po.GroupInfo;
-import com.easychat.query.GroupInfoQuery;
+
 import com.easychat.entity.vo.PaginationResultVO;
 import com.easychat.service.GroupInfoService;
-import com.easychat.mapper.GroupInfoMapper;
+
 import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
-import com.easychat.query.SimplePage;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -48,7 +51,20 @@ public class GroupInfoServiceImpl implements GroupInfoService{
 	private UserContactMapper<UserContact, UserContactQuery> userContactMapper;
     @Autowired
     private AppConfig appConfig;
-
+	@Resource
+	private ChatMessageMapper<ChatMessage, ChatMessageQuery> chatMessageMapper;
+	@Resource
+	private ChatSessionUserMapper<ChatSessionUser,ChatSessionUserQuery> chatSessionUserMapper;
+	@Resource
+	private ChatSessionMapper<ChatSession,ChatSessionQuery> chatSessionMapper;
+    @Resource
+	private ChannelContextUitls channelContextUitls;
+    @Autowired
+    private MessageHandler messageHandler;
+    @Autowired
+    private ChatSessionServiceImpl chatSessionServiceImpl;
+	@Resource
+	private ChatSessionUserService chatSessionUserService;
 
 	/**
 	 * 根据条件查询列表
@@ -152,9 +168,44 @@ public class GroupInfoServiceImpl implements GroupInfoService{
 			userContact.setUserId(groupInfo.getGroupOwnerId());
 			userContact.setCreateTime(curDate);
 			userContact.setLastUpdateTime(curDate);
-			//TODO 创建会话
-			//TODO 发送消息(欢迎)
 			this.userContactMapper.insert(userContact);
+			String sessionId=StringTools.getChatSessionId4Group(groupInfo.getGroupId());
+			ChatSession chatSession=new ChatSession();
+			chatSession.setSessionId(sessionId);
+			chatSession.setLastMessage(MessageTypeEnum.GROUP_CREATE.getInitMessage());
+			chatSession.setLastReceiveTime(curDate.getTime());
+			this.chatSessionMapper.insert(chatSession);
+			ChatSessionUser chatSessionUser=new ChatSessionUser();
+			chatSessionUser.setUserId(groupInfo.getGroupOwnerId());
+			chatSessionUser.setContactName(groupInfo.getGroupId());
+			chatSessionUser.setContactName(groupInfo.getGroupName());
+			chatSessionUser.setSessionId(sessionId);
+			this.chatSessionUserMapper.insert(chatSessionUser);
+            //创建消息
+			ChatMessage chatMessage=new ChatMessage();
+			chatMessage.setSessionId(sessionId);
+			chatMessage.setMessageType(MessageTypeEnum.GROUP_CREATE.getType());
+			chatMessage.setMessageContent(MessageTypeEnum.GROUP_CREATE.getInitMessage());
+			chatMessage.setSendTime(curDate.getTime());
+			chatMessage.setContactId(groupInfo.getGroupId());
+			chatMessage.setContactType(UserContactTypeEnum.GROUP.getType());
+			chatMessage.setStatus(MessageStatusEnum.SENDED.getStatus());
+			chatMessageMapper.insert(chatMessage);
+
+			//将群主添加到联系人
+			redisComponent.addUserContact(groupInfo.getGroupOwnerId(),groupInfo.getGroupId());
+            //将联系人通道添加到群组通道
+			channelContextUitls.addUser2Group(groupInfo.getGroupOwnerId(), groupInfo.getGroupId());
+			//发送ws消息
+			chatSessionUser.setLastMessage(MessageTypeEnum.GROUP_CREATE.getInitMessage());
+			chatSessionUser.setLastReceiveTime(curDate.getTime());
+			chatSessionUser.setMemberCount(1);
+			MessageSendDto messageSendDto= CopyTools.copy(chatMessage,MessageSendDto.class);
+			messageSendDto.setExtendData(chatSessionUser);
+			messageSendDto.setLastMessage(chatSessionUser.getLastMessage());
+			messageHandler.sendMessage(messageSendDto);
+
+			//TODO 发送消息(欢迎)
 		 }
 		//修改
 		else {
@@ -165,8 +216,15 @@ public class GroupInfoServiceImpl implements GroupInfoService{
 				throw new BusinessException(ResponseCodeEnum.CODE_600);
 			}
 			this.groupInfoMapper.updateByGroupId(groupInfo,groupInfo.getGroupId());
-			//TODO 更新相关表冗余信息
-			//TODO 修改群昵称发送ws消息
+			// 更新相关表冗余信息
+			String contactNameUpdate=null;
+			if(!dbInfo.getGroupName().equals(groupInfo.getGroupOwnerId())){
+				contactNameUpdate=groupInfo.getGroupName();
+			}
+			if(contactNameUpdate==null){
+				return ;
+			}
+			chatSessionUserService.updateRedundancyInfo(contactNameUpdate,groupInfo.getGroupId());
 		}
 		if(null==avatarFile){
 			return;

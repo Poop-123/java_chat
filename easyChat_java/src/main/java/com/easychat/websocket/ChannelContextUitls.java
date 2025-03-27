@@ -43,9 +43,9 @@ public class ChannelContextUitls {
     @Resource
     private  UserInfoMapper<UserInfo, UserInfoQuery> userInfoMapper;
     @Resource
-    private ChatMessageMapper<ChatMessage,ChatMessageQuery> chatMessageMapper;
-    @Resource
     private  RedisComponent redisComponent;
+    @Resource
+    private ChatMessageMapper<ChatMessage,ChatMessageQuery> chatMessageMapper;
    @Resource
    private ChatSessionUserService chatSessionUserService;
    @Resource
@@ -127,6 +127,11 @@ public class ChannelContextUitls {
     private static void sendMSG(){
 
     }
+    public void  addUser2Group(String userId,String groupId){
+        Channel channelUser= USER_CONTEXT_MAP.get(userId);
+        ChannelGroup channelGroup=GROUP_CONTEXT_MAP.get(groupId);
+        channelGroup.add(channelUser);
+    }
     private void add2Group(String groupId,Channel channel){
         if(channel==null){
             return;
@@ -207,14 +212,23 @@ public class ChannelContextUitls {
     //发送消息
     public static void sendMsg(MessageSendDto messageSendDto,String receiveId){
 
-        Channel sendChannel=USER_CONTEXT_MAP.get(receiveId);
-        if(sendChannel==null){
+        Channel userChannel=USER_CONTEXT_MAP.get(receiveId);
+        if(userChannel==null){
             return ;
         }
         //相对于客户端而言，联系人就是发送人，转换再发送
-        messageSendDto.setContactId(messageSendDto.getSendUserId());
-        messageSendDto.setContactName(messageSendDto.getSendUserNickName());
-        sendChannel.writeAndFlush(new TextWebSocketFrame(JsonUtils.convertObj2Json(messageSendDto)));
+        if(MessageTypeEnum.ADD_FRIEND_SELF.getType().equals(messageSendDto.getMessageType())){
+            UserInfo userInfo=(UserInfo) messageSendDto.getExtendData();
+            messageSendDto.setMessageType(MessageTypeEnum.ADD_FRIEND.getType());
+            messageSendDto.setContactId(userInfo.getUserId());
+            messageSendDto.setContactName(userInfo.getNickName());
+            messageSendDto.setExtendData(null);
+        }else{
+            messageSendDto.setContactId(messageSendDto.getSendUserId());
+            messageSendDto.setContactName(messageSendDto.getSendUserNickName());
+
+        }
+       userChannel.writeAndFlush(new TextWebSocketFrame(JsonUtils.convertObj2Json(messageSendDto)));
 
     }
 }

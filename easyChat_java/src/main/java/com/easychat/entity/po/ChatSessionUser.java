@@ -21,7 +21,7 @@ public class ChatSessionUser implements Serializable{
 	/**
 	 * 最后发言时间
 	 */
-	private String lastReceiveTime;
+	private Long lastReceiveTime;
 	/**
 	 * 联系人ID
 	 */
@@ -41,7 +41,7 @@ public class ChatSessionUser implements Serializable{
 	 * 群组人数
 	 *
 	 */
-	private String memberCount;
+	private Integer memberCount;
 
 	public Integer getContactType() {
 		return UserContactTypeEnum.getByPrefix(contactId).getType();
@@ -51,11 +51,11 @@ public class ChatSessionUser implements Serializable{
 		this.contactType = contactType;
 	}
 
-	public String getMemberCount() {
+	public Integer getMemberCount() {
 		return memberCount;
 	}
 
-	public void setMemberCount(String memberCount) {
+	public void setMemberCount(Integer memberCount) {
 		this.memberCount = memberCount;
 	}
 
@@ -67,11 +67,11 @@ public class ChatSessionUser implements Serializable{
 		this.lastMessage = lastMessage;
 	}
 
-	public String getLastReceiveTime() {
+	public Long getLastReceiveTime() {
 		return lastReceiveTime;
 	}
 
-	public void setLastReceiveTime(String lastReceiveTime) {
+	public void setLastReceiveTime(Long lastReceiveTime) {
 		this.lastReceiveTime = lastReceiveTime;
 	}
 

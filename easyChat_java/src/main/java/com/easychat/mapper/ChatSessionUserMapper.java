@@ -23,5 +23,5 @@ public interface ChatSessionUserMapper<T,P> extends BaseMapper{
 	 * 根据UserIdAndContactId删除
 	 */
 	 Integer deleteByUserIdAndContactId(@Param("userId") String userId, @Param("contactId") String contactId);
-
+     Integer updateByParam(@Param("bean") T t,@Param("query") P p);
 }
