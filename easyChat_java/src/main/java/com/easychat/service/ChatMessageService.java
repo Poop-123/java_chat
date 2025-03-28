@@ -1,10 +1,14 @@
 package com.easychat.service;
 
+import com.easychat.dto.MessageSendDto;
+import com.easychat.dto.TokenUserInfoDto;
+import com.easychat.exception.BusinessException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import com.easychat.entity.po.ChatMessage;
 import com.easychat.query.ChatMessageQuery;
 import com.easychat.entity.vo.PaginationResultVO;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
   * @Description:聊天消息表 Service
@@ -57,5 +61,7 @@ public interface ChatMessageService{
 	 * 根据MessageId删除
 	 */
 	Integer deleteChatMessageByMessageId(Long messageId);
+    MessageSendDto saveMessage(ChatMessage chatMessage, TokenUserInfoDto tokenUserInfoDto) throws BusinessException;
+	void saveMessageFile(String userId, Long messageId, MultipartFile file,MultipartFile cover) throws BusinessException;
 
 }

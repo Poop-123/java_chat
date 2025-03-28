@@ -87,4 +87,12 @@ public class StringTools {
 
         return encodeMd5(groupId);
     }
+    //获取文件后缀
+    public static String getFileSuffix(String fileName){
+        if(isEmpty(fileName)){
+            return null;
+
+        }
+        return fileName.substring(fileName.lastIndexOf("."));
+    }
 }

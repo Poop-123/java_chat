@@ -1,5 +1,21 @@
 package com.easychat.service.Impl;
 
+import com.easychat.dto.MessageSendDto;
+import com.easychat.dto.SysSettingDto;
+import com.easychat.dto.TokenUserInfoDto;
+import com.easychat.entity.constants.Constants;
+import com.easychat.entity.po.ChatSession;
+import com.easychat.entity.po.ChatSessionUser;
+import com.easychat.enums.*;
+import com.easychat.exception.BusinessException;
+import com.easychat.mapper.ChatSessionMapper;
+import com.easychat.mapper.ChatSessionUserMapper;
+import com.easychat.query.ChatSessionQuery;
+import com.easychat.query.ChatSessionUserQuery;
+import com.easychat.redis.RedisComponent;
+import com.easychat.utils.CopyTools;
+import com.easychat.utils.StringTools;
+import com.easychat.websocket.MessageHandler;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import com.easychat.entity.po.ChatMessage;
@@ -8,9 +24,13 @@ import com.easychat.entity.vo.PaginationResultVO;
 import com.easychat.service.ChatMessageService;
 import com.easychat.mapper.ChatMessageMapper;
 import javax.annotation.Resource;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.easychat.enums.PageSize;
 import com.easychat.query.SimplePage;
+import org.springframework.web.multipart.MultipartFile;
+
 /**
   * @Description:聊天消息表 Service
   * @Author:刘耿豪
@@ -21,6 +41,13 @@ public class ChatMessageServiceImpl implements ChatMessageService{
 
 	@Resource
 	private ChatMessageMapper<ChatMessage,ChatMessageQuery> chatMessageMapper;
+    @Autowired
+    private RedisComponent redisComponent;
+	@Resource
+	private ChatSessionMapper<ChatSession, ChatSessionQuery> chatSessionMapper;
+    @Resource
+	private MessageHandler messageHandler;
+
 	/**
 	 * 根据条件查询列表
 	 */
@@ -95,4 +122,86 @@ public class ChatMessageServiceImpl implements ChatMessageService{
 		return this.chatMessageMapper.deleteByMessageId(messageId);
 	}
 
+	@Override
+	public MessageSendDto saveMessage(ChatMessage chatMessage, TokenUserInfoDto tokenUserInfoDto) throws BusinessException {
+		//不是机器人回复，判断好友状态
+		if(!Constants.ROBOT_UID.equals(tokenUserInfoDto.getUserId())){
+			List<String> contactList=redisComponent.getContactList(tokenUserInfoDto.getUserId());
+			if(!contactList.contains(chatMessage.getContactId())){
+				UserContactTypeEnum userContactTypeEnum=UserContactTypeEnum.getByPrefix(chatMessage.getContactId());
+				if(UserContactTypeEnum.USER==userContactTypeEnum){
+					throw new BusinessException(ResponseCodeEnum.CODE_902);
+				}else{
+					throw new BusinessException(ResponseCodeEnum.CODE_903);
+				}
+			}
+		}
+		String sessionId=null;
+
+		String sendUserId=tokenUserInfoDto.getUserId();
+		String contactId=chatMessage.getContactId();
+        Long curTime=System.currentTimeMillis();
+		chatMessage.setSendTime(curTime);
+		UserContactTypeEnum contactTypeEnum=UserContactTypeEnum.getByPrefix(contactId);
+		if(UserContactTypeEnum.USER==contactTypeEnum){
+			sessionId= StringTools.getChatSessionId4User(new String[]{sendUserId,contactId});
+		}else{
+			sessionId=StringTools.getChatSessionId4Group(contactId);
+		}
+		chatMessage.setSessionId(sessionId);
+		MessageTypeEnum messageTypeEnum=MessageTypeEnum.getByType(chatMessage.getMessageType());
+		if(null==messageTypeEnum|| !ArrayUtils.contains(new Integer[]{MessageTypeEnum.CHAT.getType(),MessageTypeEnum.MEDIA_CHAT.getType()},chatMessage.getMessageType())){
+			throw new BusinessException(ResponseCodeEnum.CODE_600);
+		}
+        Integer status=MessageTypeEnum.MEDIA_CHAT==messageTypeEnum? MessageStatusEnum.SENDING.getStatus() : MessageStatusEnum.SENDED.getStatus();
+		chatMessage.setStatus(status);
+		String messageContent=StringTools.cleanHtmlTag(chatMessage.getMessageContent());
+		ChatSession chatSession=new ChatSession();
+		chatSession.setLastMessage(messageContent);
+		if(UserContactTypeEnum.GROUP==contactTypeEnum){
+			chatSession.setLastMessage(tokenUserInfoDto.getNickName()+":"+messageContent);
+		}
+		chatSession.setLastReceiveTime(curTime);
+		chatSessionMapper.updateBySessionId(chatSession,sessionId);
+		chatMessage.setSendUserId(sendUserId);
+		chatMessage.setSendUserNickName(tokenUserInfoDto.getNickName());
+		chatMessage.setContactType(contactTypeEnum.getType());
+		chatMessageMapper.insert(chatMessage);
+		MessageSendDto messageSendDto= CopyTools.copy(chatMessage,MessageSendDto.class);
+       if(Constants.ROBOT_UID.equals(contactId)){
+		   SysSettingDto sysSettingDto=new SysSettingDto();
+		   TokenUserInfoDto robot=new TokenUserInfoDto();
+		   robot.setUserId(sysSettingDto.getRobotUid());
+		   robot.setNickName(sysSettingDto.getRobotNickName());
+		   ChatMessage robotChatMessage=new ChatMessage();
+		   robotChatMessage.setContactId(sendUserId);
+		   //TODO对接ai实现聊天
+		   robotChatMessage.setMessageContent("我只是一个机器人，无法识别你的消息");
+		   robotChatMessage.setMessageType(MessageTypeEnum.CHAT.getType());
+		   saveMessage(robotChatMessage,robot);
+
+	   }else{
+		   messageHandler.sendMessage(messageSendDto);
+
+	   }
+
+		return null;
+	}
+
+	@Override
+	public void saveMessageFile(String userId, Long messageId, MultipartFile file, MultipartFile cover) throws BusinessException {
+        ChatMessage chatMessage=chatMessageMapper.selectByMessageId(messageId);
+		if(chatMessage==null){
+			throw new BusinessException(ResponseCodeEnum.CODE_600);
+		}
+		if(!chatMessage.getSendUserId().equals(userId)){
+			throw new BusinessException(ResponseCodeEnum.CODE_600);
+		}
+		SysSettingDto sysSettingDto=redisComponent.getSysSetting();
+		String fieldSuffix=StringTools.getFileSuffix(file.getOriginalFilename());
+		if(!StringTools.isEmpty(fieldSuffix)&&ArrayUtils.contains(Constants.IMAGE_SUFFIX_LIST,fieldSuffix.toLowerCase())&&file.getSize()>sysSettingDto.getMaxFileSize()*Constants.FILE_SIZE_MB){
+
+		}
+
+	}
 }

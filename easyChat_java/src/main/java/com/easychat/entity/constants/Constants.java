@@ -18,7 +18,7 @@ public class Constants {
 
 
     public static final String ROBOT_UID= UserContactTypeEnum.USER.getPrefix()+"robot";
-
+    public static final Long FILE_SIZE_MB=1024*1024L;
 
     public static final String FILE_FOLDER_FILE="file/";
     public static final String FILE_FOLDER_AVATAR_NAME="avatar/";
@@ -27,7 +27,8 @@ public class Constants {
     public static final String APPLY_INFO_TEMPLATE="我是%s";
 
     public static final String REGEX_PASSWORD="^(?=.*\\d)(?=.*[a-zA-Z])[\\da-zA-Z~!@#$%^&*_]{8,18}$";
-
+    public static final String[] IMAGE_SUFFIX_LIST=new String[]{".jpeg",".jpg",".png",".gif",".bmp",".webp"};
+    public static final String[] VIDEO_SUFFIX_LIST=new String[]{".mp4",".avi",".rmvb",".mkv",".mov"};
     public static final String APP_UPDATE_FOLDER="/app/";
     public static final String APP_EXE_SUFFIX=".exe";
     public static final String APP_NAME="EasyChatSetup";

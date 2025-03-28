@@ -200,7 +200,40 @@
 		</set>
 		where user_id=#{userId} and contact_id=#{contactId}
 	</update>
-	<!--根据UserIdAndContactId删除-->
+    <update id="updateByParam">
+		UPDATE chat_session_user
+		<set>
+			<if test="bean.userId!=null">
+				user_id=#{bean.userId},
+			</if>
+			<if test="bean.contactId!=null">
+				contact_id=#{bean.contactId},
+			</if>
+			<if test="bean.sessionId!=null">
+				session_id=#{bean.sessionId},
+			</if>
+			<if test="bean.contactName!=null">
+				contact_name=#{bean.contactName},
+			</if>
+		</set>
+		<where>
+			<if test="query.userId!=null">
+				and user_id=#{query.userId}
+			</if>
+			<if test="query.contactId!=null">
+		       and contact_id=#{query.contactId}
+			</if>
+			<if test="query.sessionId!=null">
+				and session_id=#{query.sessionId}
+			</if>
+		    <if test="query.contactName!=null">
+				and contact_name=#{query.contactName}
+			</if>
+
+
+		</where>
+	</update>
+    <!--根据UserIdAndContactId删除-->
 	<delete id="deleteByUserIdAndContactId">
 		delete from chat_session_user where user_id=#{userId} and contact_id=#{contactId}
 	</delete>

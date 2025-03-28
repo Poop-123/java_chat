@@ -8,6 +8,7 @@ import com.easychat.enums.MessageTypeEnum;
 import com.easychat.enums.UserContactApplyStatusEnum;
 import com.easychat.enums.UserContactTypeEnum;
 import com.easychat.mapper.ChatMessageMapper;
+import com.easychat.mapper.ChatSessionUserMapper;
 import com.easychat.mapper.UserContactApplyMapper;
 import com.easychat.mapper.UserInfoMapper;
 import com.easychat.query.*;
@@ -47,7 +48,7 @@ public class ChannelContextUitls {
     @Resource
     private ChatMessageMapper<ChatMessage,ChatMessageQuery> chatMessageMapper;
    @Resource
-   private ChatSessionUserService chatSessionUserService;
+   private ChatSessionUserMapper<ChatSessionUser,ChatSessionUserQuery> chatSessionUserMapper;
    @Resource
    private UserContactApplyMapper<UserContactApply,UserContactApplyQuery> userContactApplyMapper;
 
@@ -87,7 +88,7 @@ public class ChannelContextUitls {
         ChatSessionUserQuery chatSessionUserQuery=new ChatSessionUserQuery();
         chatSessionUserQuery.setUserId(userId);
         chatSessionUserQuery.setOrderBy("last_receive_time desc");
-        List<ChatSessionUser> chatSessionUserList=chatSessionUserService.findListByParam(chatSessionUserQuery);
+        List<ChatSessionUser> chatSessionUserList=chatSessionUserMapper.selectList(chatSessionUserQuery);
 
         WsInitData wsInitData=new WsInitData();
         wsInitData.setChatSessionList(chatSessionUserList);
