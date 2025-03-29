@@ -426,7 +426,59 @@
 		</set>
 		where message_id=#{messageId}
 	</update>
-	<!--根据MessageId删除-->
+    <update id="updateByParam">
+		UPDATE chat_message
+		<set>
+			<if test="bean.messageId!=null">
+				message_id=#{bean.messageId},
+			</if>
+			<if test="bean.sessionId!=null">
+				session_id=#{bean.sessionId},
+			</if>
+			<if test="bean.messageType!=null">
+				message_type=#{bean.messageType},
+			</if>
+			<if test="bean.messageContent!=null">
+				message_content=#{bean.messageContent},
+			</if>
+			<if test="bean.sendUserId!=null">
+				send_user_id=#{bean.sendUserId},
+			</if>
+			<if test="bean.sendUserNickName!=null">
+				send_user_nick_name=#{bean.sendUserNickName},
+			</if>
+			<if test="bean.sendTime!=null">
+				send_time=#{bean.sendTime},
+			</if>
+			<if test="bean.contactId!=null">
+				contact_id=#{bean.contactId},
+			</if>
+			<if test="bean.contactType!=null">
+				contact_type=#{bean.contactType},
+			</if>
+			<if test="bean.fileSize!=null">
+				file_size=#{bean.fileSize},
+			</if>
+			<if test="bean.fileName!=null">
+				file_name=#{bean.fileName},
+			</if>
+			<if test="bean.fileType!=null">
+				file_type=#{bean.fileType},
+			</if>
+			<if test="bean.status!=null">
+				status=#{bean.status},
+			</if>
+		</set>
+		<where>
+			<if test="query.messageId!=null">
+				and message_id=#{query.messageId}
+			</if>
+		   <if test="query.status!=null">
+			   and status=#{query.status}
+		   </if>
+		</where>
+	</update>
+    <!--根据MessageId删除-->
 	<delete id="deleteByMessageId">
 		delete from chat_message where message_id=#{messageId}
 	</delete>

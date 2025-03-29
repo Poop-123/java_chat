@@ -55,7 +55,7 @@ public class ChatController extends ABaseController{
     }
     @RequestMapping("/uploadFile")
     @GlobalInterceptor
-    public ResponseVO uploadFile(HttpServletRequest request, @NotNull Long messageId, @NotNull MultipartFile file,@NotNull MultipartFile cover){
+    public ResponseVO uploadFile(HttpServletRequest request, @NotNull Long messageId, @NotNull MultipartFile file,@NotNull MultipartFile cover) throws BusinessException {
         TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
         chatMessageService.saveMessageFile(tokenUserInfoDto.getUserId(),messageId,file,cover);
     }

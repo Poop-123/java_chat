@@ -24,4 +24,5 @@ public interface ChatMessageMapper<T,P> extends BaseMapper{
 	 */
 	 Integer deleteByMessageId(@Param("messageId") Long messageId);
 
+    void updateByParam(@Param("bean")T uploadInfo, @Param("query")P messageQuery);
 }
