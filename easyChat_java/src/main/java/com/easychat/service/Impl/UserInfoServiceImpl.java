@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.easychat.config.AppConfig;
+import com.easychat.dto.MessageSendDto;
 import com.easychat.dto.TokenUserInfoDto;
 import com.easychat.entity.constants.Constants;
 import com.easychat.entity.po.UserContact;
@@ -30,6 +31,7 @@ import com.easychat.mapper.UserInfoMapper;
 import javax.annotation.Resource;
 
 import com.easychat.utils.StringTools;
+import com.easychat.websocket.MessageHandler;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,6 +60,8 @@ public class UserInfoServiceImpl implements UserInfoService{
 	private UserContactService userContactService;
     @Resource
 	private ChatSessionUserService chatSessionUserService;
+	@Resource
+	private MessageHandler messageHandler;
 	/**
 	 * 根据条件查询列表
 	 */
@@ -203,7 +207,6 @@ public class UserInfoServiceImpl implements UserInfoService{
 			throw new BusinessException("账号已禁用！");
 		}
 
-        //TODO 查询我的群组
 		// 查询我的联系人
 		UserContactQuery contactQuery=new UserContactQuery();
 		contactQuery.setUserId(userInfo.getUserId());
@@ -251,7 +254,6 @@ public class UserInfoServiceImpl implements UserInfoService{
 		TokenUserInfoDto tokenUserInfoDto = redisComponent.getTokenUserInfoDtoByUserId(userInfo.getUserId());
 		tokenUserInfoDto.setNickName(contactNameUpdate);
 		   redisComponent.saveTokenUserInfoDto(tokenUserInfoDto);
-		   //TODO 更新会话中的昵称信息
 		   chatSessionUserService.updateRedundancyInfo(contactNameUpdate,userInfo.getUserId());
 
 	}
@@ -269,7 +271,11 @@ public class UserInfoServiceImpl implements UserInfoService{
 
 	@Override
 	public void forceOffLine(String userId) {
-       //TODO 强制下线
+		MessageSendDto sendDto=new MessageSendDto();
+		sendDto.setContactType(UserContactTypeEnum.USER.getType());
+		sendDto.setMessageType(MessageTypeEnum.FORCE_OFF_LINE.getType());
+		sendDto.setContactId(userId);
+		messageHandler.sendMessage(sendDto);
 
 	}
 

@@ -10,6 +10,7 @@ import com.easychat.entity.vo.UserInfoVO;
 import com.easychat.service.UserInfoService;
 import com.easychat.utils.CopyTools;
 import com.easychat.utils.StringTools;
+import com.easychat.websocket.ChannelContextUitls;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,8 @@ import java.io.IOException;
 public class UserInfoController extends ABaseController{
     @Resource
     private UserInfoService userInfoService;
+    @Resource
+    private ChannelContextUitls channelContextUitls;
     @RequestMapping("/getUserInfo")
     @GlobalInterceptor
     public ResponseVO getUserInfo(HttpServletRequest request){
@@ -54,7 +57,7 @@ public class UserInfoController extends ABaseController{
         UserInfo userInfo=new UserInfo();
         userInfo.setPassword(StringTools.encodeMd5(password));
         this.userInfoService.updateUserInfoByUserId(userInfo,tokenUserInfoDto.getUserId());
-        //TODO 重新登陆
+        channelContextUitls.closeContext(tokenUserInfoDto.getUserId());
         return getSuccessResponseVO(null);
     }
 
@@ -62,7 +65,7 @@ public class UserInfoController extends ABaseController{
     @GlobalInterceptor
     public ResponseVO logout(HttpServletRequest request) throws IOException {
         TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
-        //TODO 退出登录，关闭ws连接
+        channelContextUitls.closeContext(tokenUserInfoDto.getUserId());
         return getSuccessResponseVO(null);
     }
 

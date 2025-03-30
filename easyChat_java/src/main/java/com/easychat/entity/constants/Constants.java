@@ -34,4 +34,6 @@ public class Constants {
     public static final String APP_NAME="EasyChatSetup";
     public static final String REDIS_KEY_USER_CONTACT="easychat:ws:user:contact:";
     public static final Long MILLIS_SECONDS_3DAYS_AGO=3*24*60*60*1000L;
+    public static final Integer ZERO=0;
+    public static final Integer ONE=1;
 }

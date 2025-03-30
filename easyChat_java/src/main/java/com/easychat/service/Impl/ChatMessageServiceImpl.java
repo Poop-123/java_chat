@@ -7,12 +7,13 @@ import com.easychat.dto.TokenUserInfoDto;
 import com.easychat.entity.constants.Constants;
 import com.easychat.entity.po.ChatSession;
 import com.easychat.entity.po.ChatSessionUser;
+import com.easychat.entity.po.UserContact;
 import com.easychat.enums.*;
 import com.easychat.exception.BusinessException;
 import com.easychat.mapper.ChatSessionMapper;
 import com.easychat.mapper.ChatSessionUserMapper;
-import com.easychat.query.ChatSessionQuery;
-import com.easychat.query.ChatSessionUserQuery;
+import com.easychat.mapper.UserContactMapper;
+import com.easychat.query.*;
 import com.easychat.redis.RedisComponent;
 import com.easychat.utils.CopyTools;
 import com.easychat.utils.DateUtils;
@@ -25,7 +26,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import com.easychat.entity.po.ChatMessage;
-import com.easychat.query.ChatMessageQuery;
 import com.easychat.entity.vo.PaginationResultVO;
 import com.easychat.service.ChatMessageService;
 import com.easychat.mapper.ChatMessageMapper;
@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.easychat.query.SimplePage;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -57,6 +56,8 @@ public class ChatMessageServiceImpl implements ChatMessageService{
 	private MessageHandler messageHandler;
     @Autowired
     private AppConfig appConfig;
+	@Resource
+	private UserContactMapper<UserContact,UserContactQuery> userContactMapper;
 
 
 	/**
@@ -232,7 +233,7 @@ public class ChatMessageServiceImpl implements ChatMessageService{
 		if(!folder.exists()){
 			folder.mkdirs();
 		}
-		File uploadFile=new File(folder.getPath()+"/"+fileExtName);
+		File uploadFile=new File(folder.getPath()+"/"+fileRealName);
 		try{
 			file.transferTo(uploadFile);
 			cover.transferTo(new File(uploadFile.getPath()+Constants.COVER_IMAGE_SUFFIX));
@@ -255,4 +256,42 @@ public class ChatMessageServiceImpl implements ChatMessageService{
 
 
     }
+
+	@Override
+	public File downloadFile(TokenUserInfoDto userInfoDto, Long messageId, Boolean showCover) throws BusinessException {
+		ChatMessage message=chatMessageMapper.selectByMessageId(messageId);
+		String contactId=message.getContactId();
+		UserContactTypeEnum contactTypeEnum=UserContactTypeEnum.getByPrefix(contactId);
+		if(UserContactTypeEnum.USER==contactTypeEnum&&!userInfoDto.getUserId().equals(message.getContactId())){
+			throw new BusinessException(ResponseCodeEnum.CODE_600);
+		}
+		if(UserContactTypeEnum.GROUP==contactTypeEnum){
+			UserContactQuery userContactQuery=new UserContactQuery();
+			userContactQuery.setUserId(userInfoDto.getUserId());
+			userContactQuery.setContactType(UserContactTypeEnum.GROUP.getType());
+			userContactQuery.setContactId(contactId);
+			userContactQuery.setStatus(UserContactStatusEnum.FRIEND.getStatus());
+			Integer contactCount=userContactMapper.selectCount(userContactQuery);
+			if(contactCount==0){
+				throw new BusinessException(ResponseCodeEnum.CODE_600);
+			}
+		}
+		String month=DateUtils.format(new Date(message.getSendTime()),DateTimePatternEnum.YYYYMM.getPattern());
+		File folder=new File(appConfig.getProjectFolder()+Constants.FILE_FOLDER_FILE+month);
+		if(!folder.exists()){
+			folder.mkdirs();
+		}
+		String fileName=message.getFileName();
+		String fileExtName=StringTools.getFileSuffix(fileName);
+		String fileRealName=messageId+fileExtName;
+		if(showCover!=null&&showCover){
+			fileExtName=fileRealName+Constants.COVER_IMAGE_SUFFIX;
+		}
+		File file=new File(folder.getPath()+"/"+fileRealName);
+		if(!file.exists()){
+			logger.info("文件不存在",messageId);
+			throw new BusinessException(ResponseCodeEnum.CODE_602);
+		}
+		return file;
+	}
 }

@@ -10,7 +10,8 @@ public enum ResponseCodeEnum {
     CODE_500(500,"服务器返回错误，请联系管理员"),
     CODE_901(901,"登录超时"),
     CODE_902(902,"您不是对方的好友，倾向好友发送朋友验证"),
-    CODE_903(903,"你已不在群聊，请重新加入群聊");
+    CODE_903(903,"你已不在群聊，请重新加入群聊"),
+    CODE_602(602, "图片不存在！");
 
     private Integer code;
     private String msg;

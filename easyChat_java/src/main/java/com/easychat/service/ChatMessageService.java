@@ -4,6 +4,8 @@ import com.easychat.dto.MessageSendDto;
 import com.easychat.dto.TokenUserInfoDto;
 import com.easychat.exception.BusinessException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.io.File;
 import java.util.List;
 import com.easychat.entity.po.ChatMessage;
 import com.easychat.query.ChatMessageQuery;
@@ -63,5 +65,5 @@ public interface ChatMessageService{
 	Integer deleteChatMessageByMessageId(Long messageId);
     MessageSendDto saveMessage(ChatMessage chatMessage, TokenUserInfoDto tokenUserInfoDto) throws BusinessException;
 	void saveMessageFile(String userId, Long messageId, MultipartFile file,MultipartFile cover) throws BusinessException;
-
+	File downloadFile(TokenUserInfoDto userInfoDto,Long fileId,Boolean showCover) throws BusinessException;
 }

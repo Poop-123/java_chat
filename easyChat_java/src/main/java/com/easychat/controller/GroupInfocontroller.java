@@ -30,6 +30,7 @@ import com.easychat.service.GroupInfoService;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.easychat.query.SimplePage;
 import com.easychat.entity.vo.ResponseVO;
@@ -119,40 +120,28 @@ public class GroupInfocontroller extends ABaseController{
 		return getSuccessResponseVO(groupInfo);
 	}
 
-//	@GlobalInterceptor
-//	@PostMapping("/leaveGroup")
-//	@Transactional
-//	public ResponseVO leaveGroup(HttpServletRequest request,@NotEmpty String groupId) throws BusinessException {
-//		TokenUserInfoDto tokenUserInfoDto = getTokenUserInfoDto(request);
-//		UserContact userContact=this.userContactService.getUserContactByUserIdAndContactId(tokenUserInfoDto.getUserId(),groupId);
-//		if(null==userContact||!UserContactStatusEnum.FRIEND.equals(userContact.getStatus())){
-//			throw new BusinessException("你已不在群聊中！");
-//		}
-//		GroupInfo groupInfo=this.groupInfoService.getGroupInfoByGroupId(groupId);
-//		if(null==groupInfo||!GroupStatusEnum.NORMAL.equals(groupInfo.getStatus())){
-//			throw new BusinessException("群聊状态不正常！");
-//		}
-//		userContact.setStatus(UserContactStatusEnum.DEL.getStatus());
-//		this.userContactService.updateUserContactByUserIdAndContactId(userContact,tokenUserInfoDto.getUserId(),groupId);
-//		this.groupInfoService.deleteGroupInfoByGroupId(groupId);
-//		return getSuccessResponseVO(null);
-//	}
-//	@PostMapping("/dissolution")
-//	@GlobalInterceptor
-//	public ResponseVO dissolution(HttpServletRequest request,@NotEmpty String groupId) throws BusinessException {
-//		TokenUserInfoDto tokenUserInfoDto = getTokenUserInfoDto(request);
-//		GroupInfo groupInfo=this.groupInfoService.getGroupInfoByGroupId(groupId);
-//		if(null==groupInfo){
-//			throw new BusinessException("群聊不存在！");
-//		}
-//		if(!tokenUserInfoDto.getUserId().equals(groupInfo.getGroupOwnerId())){
-//			throw new BusinessException("无权解散！");
-//		}
-//		this.userContactService.updateUserContactByContactId(groupId);
-//		groupInfo.setStatus(GroupStatusEnum.DISSOLUTION.getStatus());
-//		this.groupInfoService.updateGroupInfoByGroupId(groupInfo,groupId);
-//		return getSuccessResponseVO(null);
-//	}
+	@GlobalInterceptor
+	@PostMapping("/addOrRemoveGroupUser")
+	public ResponseVO addOrRemoveGroupUser(HttpServletRequest request, @NotEmpty String groupId, @NotEmpty String selectContacts, @NotNull Integer opType) throws BusinessException {
+		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
+		groupInfoService.addOrRemoveGroupUser(tokenUserInfoDto,groupId,selectContacts,opType);
+		return getSuccessResponseVO(null);
+	}
+	@GlobalInterceptor
+	@PostMapping("/leaveGroup")
+	public ResponseVO leaveGroup(HttpServletRequest request, @NotEmpty String groupId) throws BusinessException {
+		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
+		groupInfoService.leaveGroup(tokenUserInfoDto.getUserId(),groupId,MessageTypeEnum.LEAVE_GROUP);
+		return getSuccessResponseVO(null);
+	}
+	@GlobalInterceptor
+	@PostMapping("/dissolutionGroup")
+	public ResponseVO dissolutionGroup(HttpServletRequest request, @NotEmpty String groupId) throws BusinessException {
+		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
+		groupInfoService.dissolutionGroup(tokenUserInfoDto.getUserId(),groupId);
+		return getSuccessResponseVO(null);
+	}
+
 
 
 }

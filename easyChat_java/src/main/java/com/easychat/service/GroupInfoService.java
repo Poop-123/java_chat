@@ -3,8 +3,11 @@ package com.easychat.service;
 import java.io.IOException;
 import java.util.Date;
 
+import com.easychat.dto.TokenUserInfoDto;
+import com.easychat.enums.MessageTypeEnum;
 import com.easychat.exception.BusinessException;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jdk.nashorn.internal.parser.Token;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.easychat.enums.DateTimePatternEnum;
 import com.easychat.utils.DateUtils;
@@ -72,4 +75,9 @@ public interface GroupInfoService{
 	void saveGroup(GroupInfo groupInfo, MultipartFile avatarFile,MultipartFile avatarCover) throws BusinessException, IOException;
 
 	void dissolutionGroup(String groupOwnerId,String groupId) throws BusinessException;
+
+	void addOrRemoveGroupUser(TokenUserInfoDto tokenUserInfoDto,String groupId,String selectContactId,Integer opType) throws BusinessException;
+
+	void leaveGroup(String userId, String groupId, MessageTypeEnum messageTypeEnum) throws BusinessException;
+
 }

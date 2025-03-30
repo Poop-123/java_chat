@@ -256,8 +256,10 @@ public class UserContactServiceImpl implements UserContactService{
 			friendContact.setStatus(UserContactStatusEnum.BLACKLIST_BE.getStatus());
 		}
 		userContactMapper.updateByUserIdAndContactId(friendContact,contactId,userId);
-		//TODO 从我的好友列表缓存中删除好友
-		//TODO 从好友列表缓存中删除我
+
+		redisComponent.removeUserContact(contactId,userId);
+		redisComponent.removeUserContact(userId,contactId);
+
 	}
 
 	@Override

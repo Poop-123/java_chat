@@ -4,6 +4,7 @@ import com.easychat.annotation.GlobalInterceptor;
 import com.easychat.config.AppConfig;
 import com.easychat.dto.MessageSendDto;
 import com.easychat.dto.TokenUserInfoDto;
+import com.easychat.entity.constants.Constants;
 import com.easychat.entity.po.ChatMessage;
 import com.easychat.entity.vo.ResponseVO;
 import com.easychat.enums.MessageTypeEnum;
@@ -11,6 +12,7 @@ import com.easychat.enums.ResponseCodeEnum;
 import com.easychat.exception.BusinessException;
 import com.easychat.service.ChatMessageService;
 import com.easychat.service.ChatSessionUserService;
+import com.easychat.utils.StringTools;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +22,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 @RestController
 @RequestMapping("/chat")
@@ -58,5 +65,63 @@ public class ChatController extends ABaseController{
     public ResponseVO uploadFile(HttpServletRequest request, @NotNull Long messageId, @NotNull MultipartFile file,@NotNull MultipartFile cover) throws BusinessException {
         TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
         chatMessageService.saveMessageFile(tokenUserInfoDto.getUserId(),messageId,file,cover);
+        return getSuccessResponseVO(null);
+    }
+
+    @RequestMapping("/downloadFile")
+    @GlobalInterceptor
+    public void downloadFile(HttpServletRequest request, HttpServletResponse response, @NotNull String fileId, @NotNull Boolean showCover) throws BusinessException {
+        TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
+        OutputStream out=null;
+        FileInputStream in=null;
+        try{
+            File file=null;
+            if(!StringTools.isNumber(fileId)){
+                String avatarFolderName= Constants.FILE_FOLDER_FILE+Constants.FILE_FOLDER_AVATAR_NAME;
+                String avatarPath= appconfig.getProjectFolder()+avatarFolderName+fileId+Constants.IMAGE_SUFFIX;
+                if(showCover){
+                    avatarPath=avatarPath+Constants.COVER_IMAGE_SUFFIX;
+                }
+                file=new File(avatarPath);
+                if(!file.exists()){
+                    throw new BusinessException(ResponseCodeEnum.CODE_602);
+                }
+                else{
+                    chatMessageService.downloadFile(tokenUserInfoDto,Long.parseLong(fileId),showCover);
+
+                }
+                response.setContentType("application/x-msdownload;charset=UTF-8");
+                response.setHeader("Content-Disposition","attachment");
+                response.setContentLengthLong(file.length());
+                in=new FileInputStream(file);
+                byte[] byteData=new byte[1024];
+                out=response.getOutputStream();
+                int len;
+                while((len=in.read(byteData))!=-1){
+                    out.write(byteData,0,len);
+                }
+                out.flush();
+            }
+        }catch (Exception e){
+            logger.error("下载文件失败",e);
+        }finally {
+            if(out!=null){
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    logger.error("Io异常",e);
+                }
+            } if(in!=null){
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    logger.error("Io异常",e);
+                }
+            }
+
+
+
+        }
+
     }
 }

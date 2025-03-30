@@ -292,9 +292,9 @@ public class UserContactApplyServiceImpl implements UserContactApplyService{
 			chatSessionUser.setUserId(applyUserId);
 			chatSessionUser.setContactId(contactId);
 			GroupInfo groupInfo=groupInfoMapper.selectByGroupId(contactId);
-			chatSessionUser.setContactId(groupInfo.getGroupId());
+			chatSessionUser.setContactName(groupInfo.getGroupName());
 			chatSessionUser.setSessionId(sessionId);
-			chatSessionUserMapper.insert(chatSessionUser);
+			chatSessionUserMapper.insertOrUpdate(chatSessionUser);
 			 UserInfo applyUserInfo=this.userInfoMapper.selectByUserId(applyUserId);
 			String sendMessage=String.format(MessageTypeEnum.ADD_GROUP.getInitMessage(),applyUserInfo.getNickName());
 			ChatSession chatSession=new ChatSession();

@@ -95,4 +95,11 @@ public class StringTools {
         }
         return fileName.substring(fileName.lastIndexOf("."));
     }
+    public static boolean isNumber(String str){
+        String checkNumber="^[0-9]+$";
+        if(null==str||!str.matches(checkNumber)){
+            return false;
+        }
+        return true;
+    }
 }
