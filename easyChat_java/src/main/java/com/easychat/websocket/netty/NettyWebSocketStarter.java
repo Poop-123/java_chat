@@ -13,10 +13,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
@@ -28,19 +25,15 @@ public class NettyWebSocketStarter implements Runnable{
     private static EventLoopGroup workGroup =new NioEventLoopGroup();
     @Resource
     private HandleWebSocket handleWebSocket;
-    @Autowired
+    @Resource
     private AppConfig appConfig;
-
     @PreDestroy
     public void close(){
         bossGroup.shutdownGracefully();
         workGroup.shutdownGracefully();
-
     }
-
    @Override
    public void run(){
-
        try{
            ServerBootstrap serverBootstrap=new ServerBootstrap();
            serverBootstrap.group(bossGroup,workGroup);
@@ -60,7 +53,6 @@ public class NettyWebSocketStarter implements Runnable{
                            //readerIdleTime 读超时时间  即测试阶段一定时间内未接收到被测试端信息
                            //writerIdleTime 写超时时间 即测试端一定时间内向被测试端发送消息
                            //allIdleTime 所有类型的超时时间
-
                            //设置心跳规则
                            pipeline.addLast(new IdleStateHandler(60,0,0,TimeUnit.SECONDS));
                            //设置心跳处理
@@ -71,10 +63,8 @@ public class NettyWebSocketStarter implements Runnable{
                            pipeline.addLast( handleWebSocket);
                        }
                    });
-           String wsPort=System.getProperty("ws.port");
            ChannelFuture channelFuture= serverBootstrap.bind(appConfig.getWePort()).sync();
            logger.info("netty启动成功,端口：{}",appConfig.getWePort());
-
            channelFuture.channel().closeFuture().sync();
        }catch (Exception e){
            logger.error("启动netty失败");

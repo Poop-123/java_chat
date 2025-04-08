@@ -229,7 +229,7 @@ public class UserContactApplyServiceImpl implements UserContactApplyService{
 			contactList.add(userContact);
 		}
 		//批量插入
-		userContactMapper.insertBatch(contactList);
+		userContactMapper.insertOrUpdateBatch(contactList);
 		if(UserContactTypeEnum.USER.getType().equals(contactType)){
 			redisComponent.addUserContact(receiveUserId,applyUserId);
 		}
@@ -261,11 +261,11 @@ public class UserContactApplyServiceImpl implements UserContactApplyService{
 			chatSessionUserList.add(applySessionUser);
 			//接收人
 			ChatSessionUser contactSessionUser=new ChatSessionUser();
-			applySessionUser.setUserId(contactId);
-			applySessionUser.setContactId(applyUserId);
-			applySessionUser.setSessionId(sessionId);
+			contactSessionUser.setUserId(contactId);
+			contactSessionUser.setContactId(applyUserId);
+			contactSessionUser.setSessionId(sessionId);
 			UserInfo applyUser= this.userInfoMapper.selectByUserId(applyUserId);
-			applySessionUser.setContactName(applyUser.getNickName());
+			contactSessionUser.setContactName(applyUser.getNickName());
 			chatSessionUserList.add(contactSessionUser);
 			this.chatSessionUserMapper.insertOrUpdateBatch(chatSessionUserList);
 			//记录消息表

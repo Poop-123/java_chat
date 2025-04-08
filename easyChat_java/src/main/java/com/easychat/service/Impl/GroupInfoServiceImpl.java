@@ -162,7 +162,7 @@ public class GroupInfoServiceImpl implements GroupInfoService{
 				 throw new BusinessException("最多只能创建"+sysSettingDto.getMaxGroupCount()+"个群聊");
 			 }
 			 if(null==avatarFile){
-				 throw new BusinessException(ResponseCodeEnum.CODE_600);
+			//	 throw new BusinessException(ResponseCodeEnum.CODE_600);
 			 }
 			 groupInfo.setCreateTime(curDate);
 			 groupInfo.setGroupId(StringTools.getGroupId());
@@ -184,7 +184,7 @@ public class GroupInfoServiceImpl implements GroupInfoService{
 			this.chatSessionMapper.insert(chatSession);
 			ChatSessionUser chatSessionUser=new ChatSessionUser();
 			chatSessionUser.setUserId(groupInfo.getGroupOwnerId());
-			chatSessionUser.setContactName(groupInfo.getGroupId());
+			chatSessionUser.setContactId(groupInfo.getGroupId());
 			chatSessionUser.setContactName(groupInfo.getGroupName());
 			chatSessionUser.setSessionId(sessionId);
 			this.chatSessionUserMapper.insert(chatSessionUser);
@@ -263,13 +263,32 @@ public class GroupInfoServiceImpl implements GroupInfoService{
 		userContactQuery.setContactType(UserContactTypeEnum.GROUP.getType());
 		UserContact updateUserContact=new UserContact();
 		updateUserContact.setStatus(UserContactStatusEnum.DEL.getStatus());
+
+
 		this.userContactMapper.updateByParam(updateUserContact,userContactQuery);
 		List<UserContact> userContactList=this.userContactMapper.selectList(userContactQuery);
+
+
+
+
+
+
+
+
 		for(UserContact userContact:userContactList ){
 			redisComponent.removeUserContact(userContact.getUserId(),userContact.getContactId());
 		}
+
+
+
+
+
+
 		String sessionId=StringTools.getChatSessionId4Group(groupId);
 		Date curDate=new Date();
+
+
+
 		String messageContent=MessageTypeEnum.DISSOLUTION_GROUP.getInitMessage();
 		ChatSession chatSession=new ChatSession();
 		chatSession.setLastMessage(messageContent);

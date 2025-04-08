@@ -55,7 +55,7 @@ public class UserInfoServiceImpl implements UserInfoService{
 	@Resource
 	private RedisComponent redisComponent;
     @Resource
-    private UserContactMapper userContactMapper;
+    private UserContactMapper<UserInfo,UserInfoQuery> userContactMapper;
 	@Resource
 	private UserContactService userContactService;
     @Resource
@@ -160,12 +160,11 @@ public class UserInfoServiceImpl implements UserInfoService{
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void register(String email, String nickName, String password) throws BusinessException {
-
-          UserInfo userInfo=this.userInfoMapper.selectByEmail(email);
+		  //通过邮箱查询是否已存在账号
+          UserInfo userInfo=userInfoMapper.selectByEmail(email);
 		  if(null!=userInfo){
 			  throw new BusinessException("账号已存在");
 		  }
-
 			  String userId= null;
 			  UserInfoBeauty beautyAccount=this.userInfoBeautyMapper.selectByEmail(email);
 			  //存在未使用的靓号
@@ -176,6 +175,7 @@ public class UserInfoServiceImpl implements UserInfoService{
 			  else {
 				  userId=StringTools.getUserId();
 			  }
+			  //初始化userInfo
 			  Date curDate=new Date();
 			  userInfo=new UserInfo();
 			  userInfo.setUserId(userId);
@@ -186,7 +186,9 @@ public class UserInfoServiceImpl implements UserInfoService{
 			  userInfo.setStatus(UserStatusEnum.ENABLE.getStatus());
 			  userInfo.setLastOffTime(curDate.getTime());
 			  userInfo.setJoinType(JoinTypeEnum.APPLY.getType());
-			  this.userInfoMapper.insert(userInfo);
+			  //保存到数据库
+			  userInfoMapper.insert(userInfo);
+			  //更新靓号使用情况
 			  if(useBeautyAccount){
 				  UserInfoBeauty updateBeauty=new UserInfoBeauty();
 				  updateBeauty.setStatus(BeautyAccountStatusEnum.USERD.getStatus());
@@ -200,7 +202,8 @@ public class UserInfoServiceImpl implements UserInfoService{
 	public TokenUserInfoDto login(String email, String password) throws BusinessException {
 
 		UserInfo userInfo=userInfoMapper.selectByEmail(email);
-		if(null==userInfo||!userInfo.getPassword().equals(StringTools.encodeMd5(password))){
+		if(null==userInfo||!userInfo.getPassword().equals(password)){
+
 			throw new BusinessException("账号或密码错误！");
 		}
 		if(UserStatusEnum.DISABLE.getStatus().equals(userInfo.getStatus())){

@@ -44,7 +44,7 @@ public class UserContactApply implements Serializable{
 	/**
 	 * 状态 0:待处理 1:已同意 2:已拒绝 3:已拉黑
 	 */
-	 @JsonIgnore
+
 	 private Integer status;
 	/**
 	 * 申请者名称

@@ -266,28 +266,27 @@
 		where user_id=#{userId} and contact_id=#{contactId}
 	</update>
     <update id="updateByParam" parameterType="com.easychat.query.UserContactQuery">
-		UPDATE user_contact
+		UPDATE user_contact c
 		<set>
-			<if test="bean.userId!=null">
-				user_id=#{bean.userId},
-			</if>
-			<if test="bean.contactId!=null">
-				contact_id=#{bean.contactId},
-			</if>
+
 			<if test="bean.contactType!=null">
-				contact_type=#{bean.contactType},
+				c.contact_type=#{bean.contactType},
 			</if>
 			<if test="bean.createTime!=null">
-				create_time=#{bean.createTime},
+				c.create_time=#{bean.createTime},
 			</if>
 			<if test="bean.status!=null">
-				status=#{bean.status},
+				c.status=#{bean.status},
 			</if>
 			<if test="bean.lastUpdateTime!=null">
-				last_update_time=#{bean.lastUpdateTime},
+				c.last_update_time=#{bean.lastUpdateTime},
 			</if>
 		</set>
-		<include refid="base_query_condition_extend"/>
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+
 	</update>
     <!--根据UserIdAndContactId删除-->
 	<delete id="deleteByUserIdAndContactId">

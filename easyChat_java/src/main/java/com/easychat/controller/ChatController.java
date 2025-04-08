@@ -7,19 +7,15 @@ import com.easychat.dto.TokenUserInfoDto;
 import com.easychat.entity.constants.Constants;
 import com.easychat.entity.po.ChatMessage;
 import com.easychat.entity.vo.ResponseVO;
-import com.easychat.enums.MessageTypeEnum;
 import com.easychat.enums.ResponseCodeEnum;
 import com.easychat.exception.BusinessException;
 import com.easychat.service.ChatMessageService;
-import com.easychat.service.ChatSessionUserService;
 import com.easychat.utils.StringTools;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,12 +34,12 @@ public class ChatController extends ABaseController{
     @Resource
     private ChatMessageService chatMessageService;
     @Resource
-    private ChatSessionUserService chatSessionUserService;
-    @Resource
     private AppConfig appconfig;
+    //发送信息
     @RequestMapping("/sendMessage")
     @GlobalInterceptor
-    public ResponseVO sendMessage(HttpServletRequest request, @NotNull String contactId,
+    public ResponseVO sendMessage(HttpServletRequest request,
+                                  @NotNull String contactId,
                                   @NotEmpty @Max(500) String messageContent,
                                   @NotNull Integer messageType,
                                   Long fileSize,
@@ -53,24 +49,32 @@ public class ChatController extends ABaseController{
         ChatMessage chatMessage=new ChatMessage();
         chatMessage.setContactId(contactId);
         chatMessage.setMessageContent(messageContent);
-        chatMessage.setFileType(messageType);
         chatMessage.setFileName(fileName);
+        chatMessage.setFileSize(fileSize);
+        chatMessage.setFileType(fileType);
         chatMessage.setMessageType(messageType);
         TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
         MessageSendDto messageSendDto=chatMessageService.saveMessage(chatMessage,tokenUserInfoDto);
        return getSuccessResponseVO(messageSendDto);
     }
+    //上传文件
     @RequestMapping("/uploadFile")
     @GlobalInterceptor
-    public ResponseVO uploadFile(HttpServletRequest request, @NotNull Long messageId, @NotNull MultipartFile file,@NotNull MultipartFile cover) throws BusinessException {
+    public ResponseVO uploadFile(HttpServletRequest request,
+                                 @NotNull Long messageId,
+                                 @NotNull MultipartFile file,
+                                 @NotNull MultipartFile cover) throws BusinessException {
         TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
         chatMessageService.saveMessageFile(tokenUserInfoDto.getUserId(),messageId,file,cover);
         return getSuccessResponseVO(null);
     }
-
+    //下载文件
     @RequestMapping("/downloadFile")
     @GlobalInterceptor
-    public void downloadFile(HttpServletRequest request, HttpServletResponse response, @NotNull String fileId, @NotNull Boolean showCover) throws BusinessException {
+    public void downloadFile(HttpServletRequest request,
+                             HttpServletResponse response,
+                             @NotNull String fileId,
+                             @NotNull Boolean showCover) throws BusinessException {
         TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
         OutputStream out=null;
         FileInputStream in=null;
@@ -93,6 +97,7 @@ public class ChatController extends ABaseController{
                 response.setContentType("application/x-msdownload;charset=UTF-8");
                 response.setHeader("Content-Disposition","attachment");
                 response.setContentLengthLong(file.length());
+
                 in=new FileInputStream(file);
                 byte[] byteData=new byte[1024];
                 out=response.getOutputStream();
@@ -118,10 +123,6 @@ public class ChatController extends ABaseController{
                     logger.error("Io异常",e);
                 }
             }
-
-
-
         }
-
     }
 }

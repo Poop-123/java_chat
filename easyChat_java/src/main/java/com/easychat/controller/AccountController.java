@@ -14,12 +14,10 @@ import com.easychat.utils.CopyTools;
 import com.wf.captcha.ArithmeticCaptcha;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
@@ -32,30 +30,40 @@ import java.util.UUID;
 @Validated
 public class AccountController extends ABaseController{
     private static final Logger logger= LoggerFactory.getLogger(AccountController.class);
-    @Autowired
+    @Resource
     private  RedisUtils<String> redisUtils;
-    @Autowired
+    @Resource
     private UserInfoService userInfoService;
-    @Autowired
+    @Resource
     private RedisComponent redisComponent;
+
     //发送验证码
-    @PostMapping("/checkCode")
+    @RequestMapping("/checkCode")
     public ResponseVO  checkCode(){
         ArithmeticCaptcha captcha=new ArithmeticCaptcha(100,42);
+
         String code=captcha.text();
-        logger.info("验证码："+code);
         String checkCodeKey= UUID.randomUUID().toString();
         String checkCodeBase64=captcha.toBase64();
+
         redisUtils.setex(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey,code,Constants.REDIS_TIME_ONE_MINUTE);
+
         Map<String,String> result=new HashMap<>();
         result.put("checkCode",checkCodeBase64);
         result.put("checkCodeKey",checkCodeKey);
+
         return getSuccessResponseVO(result);
     }
+
     //注册
-    @PostMapping("/register")
-    ResponseVO register(@NotEmpty String checkCodeKey, @NotEmpty @Email  String email, @NotEmpty @Pattern(regexp = Constants.REGEX_PASSWORD)String password, @NotEmpty String nickName, @NotEmpty String checkCode){
+    @RequestMapping("/register")
+    ResponseVO register(@NotEmpty String checkCodeKey,
+                        @NotEmpty @Email  String email,
+                        @NotEmpty @Pattern(regexp = Constants.REGEX_PASSWORD)String password,
+                        @NotEmpty String nickName,
+                        @NotEmpty String checkCode){
         try{
+            //验证码错误
            if(!checkCode.equals(redisUtils.get(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey))){
                return getBusinessErrorResponseVO(new BusinessException("图片验证码不正确！"),null);
            }
@@ -64,21 +72,26 @@ public class AccountController extends ABaseController{
             e.printStackTrace();
         } finally {
             redisUtils.delete(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey);
-
         }
         return getSuccessResponseVO(null);
     }
-    @PostMapping("/login")
-    ResponseVO login(@NotEmpty String checkCodeKey,@NotEmpty String email,@NotEmpty String password,@NotEmpty String checkCode){
+    //登录
+    @RequestMapping("/login")
+    ResponseVO login(@NotEmpty String checkCodeKey,
+                     @NotEmpty String email,
+                     @NotEmpty String password,
+                     @NotEmpty String checkCode){
         try{
             if(!checkCode.equals(redisUtils.get(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey))){
                 throw new BusinessException("图片验证码不正确！");
             }
             TokenUserInfoDto tokenUserInfoDto=userInfoService.login(email,password);
+
             UserInfo userInfo=userInfoService.getUserInfoByUserId(tokenUserInfoDto.getUserId());
             UserInfoVO userInfoVO= CopyTools.copy(userInfo, UserInfoVO.class);
             userInfoVO.setToken(tokenUserInfoDto.getToken());
             userInfoVO.setAdmin(tokenUserInfoDto.getAdmin());
+
             return getSuccessResponseVO(userInfoVO);
 
         } catch (Exception e) {
@@ -89,8 +102,9 @@ public class AccountController extends ABaseController{
         }
         return getSuccessResponseVO(null);
     }
+    //系统配置页面
     @GlobalInterceptor
-    @PostMapping("/getSysSetting")
+    @RequestMapping("/getSysSetting")
     ResponseVO getSysSetting(){
         return getSuccessResponseVO(redisComponent.getSysSetting());
     }

@@ -133,7 +133,7 @@
 					last_apply_time,
 				</if>
 				<if test="bean.status!=null">
-					a.status,
+					status,
 				</if>
 				<if test="bean.applyInfo!=null">
 					apply_info,
@@ -189,7 +189,7 @@
 					last_apply_time,
 				</if>
 				<if test="bean.status!=null">
-					a.status,
+					status,
 				</if>
 				<if test="bean.applyInfo!=null">
 					apply_info,

@@ -28,9 +28,8 @@ public class HandleWebSocket extends SimpleChannelInboundHandler<TextWebSocketFr
     RedisUtils redisUtils;
     @Resource
     ChannelContextUitls channelContextUitls;
-    @Autowired
+    @Resource
     private RedisComponent redisComponent;
-
     @Override
     //通道就绪调用 一般用来做初始化
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -70,10 +69,9 @@ public class HandleWebSocket extends SimpleChannelInboundHandler<TextWebSocketFr
             }
             channelContextUitls.addContext(tokenUserInfoDto.getUserId(),ctx.channel());
         }
-
     }
     private String getToken(String url){
-        if(StringTools.isEmpty(url)||url.indexOf("?")==-1){
+        if(StringTools.isEmpty(url)|| !url.contains("?")){
             return null;
         }
         String[] queryParams=url.split("\\?");
@@ -85,6 +83,5 @@ public class HandleWebSocket extends SimpleChannelInboundHandler<TextWebSocketFr
             return null;
         }
         return params[1];
-
     }
 }

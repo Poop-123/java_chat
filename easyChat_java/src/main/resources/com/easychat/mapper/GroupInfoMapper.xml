@@ -255,9 +255,7 @@
 <update id="updateByGroupId" parameterType="com.easychat.entity.po.GroupInfo">
 		UPDATE group_info
 		<set>
-			<if test="bean.groupId!=null">
-				group_id=#{bean.groupId},
-			</if>
+
 			<if test="bean.groupName!=null">
 				group_name=#{bean.groupName},
 			</if>
@@ -277,7 +275,10 @@
 				status=#{bean.status},
 			</if>
 		</set>
-		where group_id=#{groupId}
+	    <where>
+			and group_id=#{groupId}
+		</where>
+
 	</update>
 	<!--根据GroupId删除-->
 	<delete id="deleteByGroupId">

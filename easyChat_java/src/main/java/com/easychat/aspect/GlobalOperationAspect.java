@@ -20,7 +20,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 
-@Aspect//切面，切点，事件通知类型
+@Aspect
 @Component("globalOperationAspect")
 public class GlobalOperationAspect {
     @Resource

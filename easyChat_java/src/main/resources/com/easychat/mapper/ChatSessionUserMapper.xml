@@ -62,7 +62,7 @@
 
 		    u.*,
 		    c.last_message lastMessage,
-		    c.last_receive_time lastReceiveTime
+		    c.last_receive_time lastReceiveTime,
 		    CASE WHEN SUBSTRING(contact_id,1,1)='G'
 		    THEN (select count(1) from user_contact uc where uc.contact_id=u.contact_id)
 		    ELSE 0

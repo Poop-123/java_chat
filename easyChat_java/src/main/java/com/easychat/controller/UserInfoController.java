@@ -1,6 +1,5 @@
 package com.easychat.controller;
 
-import com.alibaba.druid.util.FnvHash;
 import com.easychat.annotation.GlobalInterceptor;
 import com.easychat.dto.TokenUserInfoDto;
 import com.easychat.entity.constants.Constants;
@@ -14,7 +13,6 @@ import com.easychat.websocket.ChannelContextUitls;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
@@ -28,6 +26,7 @@ public class UserInfoController extends ABaseController{
     private UserInfoService userInfoService;
     @Resource
     private ChannelContextUitls channelContextUitls;
+    //获取用户
     @RequestMapping("/getUserInfo")
     @GlobalInterceptor
     public ResponseVO getUserInfo(HttpServletRequest request){
@@ -36,10 +35,13 @@ public class UserInfoController extends ABaseController{
         UserInfoVO userInfoVO= CopyTools.copy(userInfo,UserInfoVO.class);
         return getSuccessResponseVO(userInfoVO);
     }
-
+    //保存用户
     @RequestMapping("/saveUserInfo")
     @GlobalInterceptor
-    public ResponseVO saveUserInfo(HttpServletRequest request, UserInfo userInfo, MultipartFile avatarFile,MultipartFile avatarCover) throws IOException {
+    public ResponseVO saveUserInfo(HttpServletRequest request,
+                                   UserInfo userInfo,
+                                   MultipartFile avatarFile,
+                                   MultipartFile avatarCover) throws IOException {
         TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
         userInfo.setUserId(tokenUserInfoDto.getUserId());
         userInfo.setPassword(null);
@@ -49,10 +51,11 @@ public class UserInfoController extends ABaseController{
         this.userInfoService.updateUserInfo(userInfo,avatarFile,avatarCover);
         return getUserInfo(request);
     }
-
+    //更新密码
     @RequestMapping("/updatePassword")
     @GlobalInterceptor
-    public ResponseVO updatePassword(HttpServletRequest request, @NotEmpty @Pattern(regexp = Constants.REGEX_PASSWORD)String password) throws IOException {
+    public ResponseVO updatePassword(HttpServletRequest request,
+                                     @NotEmpty @Pattern(regexp = Constants.REGEX_PASSWORD)String password) throws IOException {
         TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
         UserInfo userInfo=new UserInfo();
         userInfo.setPassword(StringTools.encodeMd5(password));
@@ -60,7 +63,7 @@ public class UserInfoController extends ABaseController{
         channelContextUitls.closeContext(tokenUserInfoDto.getUserId());
         return getSuccessResponseVO(null);
     }
-
+    //退出登录
     @RequestMapping("/logout")
     @GlobalInterceptor
     public ResponseVO logout(HttpServletRequest request) throws IOException {
@@ -68,6 +71,4 @@ public class UserInfoController extends ABaseController{
         channelContextUitls.closeContext(tokenUserInfoDto.getUserId());
         return getSuccessResponseVO(null);
     }
-
-
 }

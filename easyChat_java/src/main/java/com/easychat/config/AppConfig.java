@@ -12,19 +12,15 @@ public class AppConfig {
     private String projectFolder;
     @Value("${admin.emails:}")
     private String adminEmails;
-
     public Integer getWePort() {
         return wePort;
     }
-
     public String getProjectFolder() {
         if(StringTools.isEmpty(projectFolder)&&!projectFolder.endsWith("/")){
             projectFolder=projectFolder+"/";
-
         }
         return projectFolder;
     }
-
     public String getAdminEmails() {
         return adminEmails;
     }

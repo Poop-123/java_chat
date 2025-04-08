@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class SysSettingDto {
     private static final long serialVersionUID=-423433829529L;
     //最大的群组数
-    private Integer maxGroupCount=5;
+    private Integer maxGroupCount=15;
     //群组最大人数
     private Integer maxGroupMemberCount=500;
     //图片大小

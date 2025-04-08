@@ -53,7 +53,7 @@ public class ChannelContextUitls {
    private UserContactApplyMapper<UserContactApply,UserContactApplyQuery> userContactApplyMapper;
 
     public void addContext(String userId, Channel channel){
-          String channelId=channel.id().toString();
+        String channelId=channel.id().toString();
         AttributeKey attributeKey=null;
         if(!AttributeKey.exists(channelId)){
             attributeKey=AttributeKey.newInstance(channelId);
@@ -80,7 +80,6 @@ public class ChannelContextUitls {
         //超过三天
         if(sourceLastOffTime!=null&&System.currentTimeMillis()- Constants.MILLIS_SECONDS_3DAYS_AGO>sourceLastOffTime){
             lastOffTime=System.currentTimeMillis()- Constants.MILLIS_SECONDS_3DAYS_AGO;
-
         }
         /**
          * 1.查询会话信息，查询用户所有的会话信息 保证换了设备会同步
@@ -89,7 +88,6 @@ public class ChannelContextUitls {
         chatSessionUserQuery.setUserId(userId);
         chatSessionUserQuery.setOrderBy("last_receive_time desc");
         List<ChatSessionUser> chatSessionUserList=chatSessionUserMapper.selectList(chatSessionUserQuery);
-
         WsInitData wsInitData=new WsInitData();
         wsInitData.setChatSessionList(chatSessionUserList);
         /**
@@ -101,8 +99,7 @@ public class ChannelContextUitls {
         chatMessageQuery.setLastReceiveTime(lastOffTime);
         chatMessageQuery.setContactIdList(contactList);
         List<ChatMessage> chatMessageList=chatMessageMapper.selectList(chatMessageQuery);
-        wsInitData.setChatMessagesList(new ArrayList<>());
-
+        wsInitData.setChatMessagesList(chatMessageList);
         /**
          * 3查询聊天申请
          */
@@ -111,27 +108,17 @@ public class ChannelContextUitls {
         applyQuery.setStatus(UserContactApplyStatusEnum.INIT.getStatus());
         applyQuery.setLastApplyTimestamp(lastOffTime);
         Integer applyCount=userContactApplyMapper.selectCount(applyQuery);
-        wsInitData.setApplyCount(0);
+        wsInitData.setApplyCount(applyCount);
         //发送消息
         MessageSendDto messageSendDto=new MessageSendDto();
         messageSendDto.setMessageType(MessageTypeEnum.INIT.getType());
         messageSendDto.setContactId(userId);
         messageSendDto.setExtendData(wsInitData);
         sendMsg(messageSendDto,userId);
-
-
-
-
-
-    }
-
-    private static void sendMSG(){
-
     }
     public void  addUser2Group(String userId,String groupId){
         Channel channelUser= USER_CONTEXT_MAP.get(userId);
-        ChannelGroup channelGroup=GROUP_CONTEXT_MAP.get(groupId);
-        channelGroup.add(channelUser);
+        add2Group(groupId,channelUser);
     }
     private void add2Group(String groupId,Channel channel){
         if(channel==null){
@@ -172,7 +159,6 @@ public class ChannelContextUitls {
                 send2Group(messageSendDto);
                 break;
         }
-
     }
     //发送给用户
     private void send2User(MessageSendDto messageSendDto){
@@ -196,8 +182,6 @@ public class ChannelContextUitls {
             return ;
         }
         channel.close();
-
-
     }
     //发送给群组
     private void send2Group(MessageSendDto messageSendDto){
@@ -212,7 +196,7 @@ public class ChannelContextUitls {
        //移除群聊
        MessageTypeEnum messageTypeEnum=MessageTypeEnum.getByType(messageSendDto.getMessageType());
        if(MessageTypeEnum.LEAVE_GROUP==messageTypeEnum||MessageTypeEnum.REMOVE_GROUP==messageTypeEnum){
-           String userId=(String)messageSendDto.getContactId();
+           String userId=messageSendDto.getContactId();
            redisComponent.removeUserContact(userId,messageSendDto.getContactId());
            Channel channel=USER_CONTEXT_MAP.get(userId);
            if (channel == null){
@@ -227,7 +211,6 @@ public class ChannelContextUitls {
     }
     //发送消息
     public static void sendMsg(MessageSendDto messageSendDto,String receiveId){
-
         Channel userChannel=USER_CONTEXT_MAP.get(receiveId);
         if(userChannel==null){
             return ;
@@ -242,7 +225,6 @@ public class ChannelContextUitls {
         }else{
             messageSendDto.setContactId(messageSendDto.getSendUserId());
             messageSendDto.setContactName(messageSendDto.getSendUserNickName());
-
         }
        userChannel.writeAndFlush(new TextWebSocketFrame(JsonUtils.convertObj2Json(messageSendDto)));
 

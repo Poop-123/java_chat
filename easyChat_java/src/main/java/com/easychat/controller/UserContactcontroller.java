@@ -1,7 +1,5 @@
 package com.easychat.controller;
 
-import java.util.Date;
-
 import com.easychat.annotation.GlobalInterceptor;
 import com.easychat.dto.TokenUserInfoDto;
 import com.easychat.dto.UserContactSearchResultDto;
@@ -13,12 +11,7 @@ import com.easychat.query.UserContactApplyQuery;
 import com.easychat.service.UserContactApplyService;
 import com.easychat.service.UserInfoService;
 import com.easychat.utils.CopyTools;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jodd.util.ArraysUtil;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.format.annotation.DateTimeFormat;
-import com.easychat.utils.DateUtils;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import com.easychat.entity.po.UserContact;
 import com.easychat.query.UserContactQuery;
@@ -30,28 +23,23 @@ import com.easychat.service.UserContactService;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
-
-import com.easychat.query.SimplePage;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.easychat.entity.vo.ResponseVO;
-import org.springframework.web.bind.annotation.RequestBody;
-
 /**
   * @Description:联系人 Service
   * @Author:刘耿豪
   * @Date:2025/03/19
   */
 @RestController
-	@RequestMapping("/userContact")
+	@RequestMapping("/contact")
 public class UserContactcontroller extends ABaseController{
-
 	@Resource
 	private UserContactService userContactService;
 	@Resource
 	private UserInfoService userInfoService;
 	@Resource
 	private UserContactApplyService userContactApplyService;
-
+    //搜索
 	@GlobalInterceptor
 	@PostMapping("/search")
 	@Validated
@@ -60,6 +48,7 @@ public class UserContactcontroller extends ABaseController{
 		UserContactSearchResultDto userContactSearchResultDto = this.userContactService.searchContact(tokenUserInfoDto.getUserId(), contactId);
 		return getSuccessResponseVO(userContactSearchResultDto);
 	}
+	//添加申请
 	@GlobalInterceptor
 	@PostMapping("/applyAdd")
 	@Validated
@@ -68,6 +57,7 @@ public class UserContactcontroller extends ABaseController{
 		Integer joinType= userContactService.applyAdd(tokenUserInfoDto,contactId,applyInfo);
 		return getSuccessResponseVO(joinType);
 	}
+	//加载申请
 	@GlobalInterceptor
 	@PostMapping("/loadApply")
 	public ResponseVO loadApply(HttpServletRequest request,Integer pageNo){
@@ -81,17 +71,21 @@ public class UserContactcontroller extends ABaseController{
 		PaginationResultVO resultVO=userContactApplyService.findListByPage(userContactApplyQuery);
 		return getSuccessResponseVO(resultVO);
 	}
+	//处理申请
 	@GlobalInterceptor
-	@PostMapping("/dealWithApply")
-	public ResponseVO dealWithApply(HttpServletRequest request,@NotEmpty Integer applyId ,@NotEmpty Integer status ) throws BusinessException {
+	@RequestMapping("/dealWithApply")
+	public ResponseVO dealWithApply(HttpServletRequest request,
+									@NotEmpty Integer applyId,
+									@NotEmpty Integer status ) throws BusinessException {
 		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
 		this.userContactApplyService.dealWithApply(tokenUserInfoDto.getUserId(),applyId,status);
 		return getSuccessResponseVO(null);
 	}
-
+    //加载好友
 	@RequestMapping("/loadContact")
 	@GlobalInterceptor
-	public ResponseVO loadContact(HttpServletRequest request,@NotEmpty String contactType) throws BusinessException {
+	public ResponseVO loadContact(HttpServletRequest request,
+								  @NotEmpty String contactType) throws BusinessException {
 		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
 		UserContactTypeEnum contactTypeEnum=UserContactTypeEnum.getByName(contactType);
 		if(null==contactTypeEnum){
@@ -102,10 +96,8 @@ public class UserContactcontroller extends ABaseController{
 		contactQuery.setContactType(contactTypeEnum.getType());
 		if(UserContactTypeEnum.USER==contactTypeEnum){
 			contactQuery.setQueryContactUserInfo(true);
-
 		}
 		else if(UserContactTypeEnum.GROUP==contactTypeEnum){
-
 			contactQuery.setQueryGroupInfo(true);
 			contactQuery.setExcludeMyOwnGroup(true);
 		}
@@ -114,20 +106,35 @@ public class UserContactcontroller extends ABaseController{
 				UserContactStatusEnum.FRIEND.getStatus(),
 				UserContactStatusEnum.DEL_BE.getStatus(),
 				UserContactStatusEnum.BLACKLIST_BE.getStatus(),
-
-
 		});
 		List<UserContact> contactList=userContactService.findListByParam(contactQuery);
 		return getSuccessResponseVO(contactList);
 	}
+	//显示联系人详情
+	@RequestMapping("/getContactInfo")
+	@GlobalInterceptor
+	public ResponseVO getContactInfo(HttpServletRequest request,@NotEmpty String contactId){
+		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
+		UserInfo userInfo=userInfoService.getUserInfoByUserId(contactId);
+		UserInfoVO userInfoVO=CopyTools.copy(userInfo,UserInfoVO.class);
+		userInfoVO.setContactStatus(UserContactStatusEnum.NOT_FRIEND.getStatus());
+		UserContact userContact=userContactService.getUserContactByUserIdAndContactId(tokenUserInfoDto.getUserId(),contactId);
+		if(userContact!=null){
+			userInfoVO.setContactStatus(UserContactStatusEnum.FRIEND.getStatus());
+		}
+		return getSuccessResponseVO(userInfoVO);
 
+	}
+    //删除好友
 	@RequestMapping("/delContact")
 	@GlobalInterceptor
 	public ResponseVO delContact(HttpServletRequest request,@NotEmpty String contactId) throws BusinessException {
+		System.out.println("删除好友");
 		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
 		userContactService.removeUserContact(tokenUserInfoDto.getUserId(),contactId,UserContactStatusEnum.DEL);
 		return getSuccessResponseVO(null);
 	}
+	//添加黑名单
 	@RequestMapping("/addContact2BlackList")
 	@GlobalInterceptor
 	public ResponseVO addContact2BlackList(HttpServletRequest request,@NotEmpty String contactId) throws BusinessException {
@@ -135,31 +142,22 @@ public class UserContactcontroller extends ABaseController{
 		userContactService.removeUserContact(tokenUserInfoDto.getUserId(),contactId,UserContactStatusEnum.BLACKLIST);
 		return getSuccessResponseVO(null);
 	}
-
-
+	//得到好友信息
 	@RequestMapping("/getContactUserInfo")
 	@GlobalInterceptor
 	public ResponseVO getContactUserInfo(HttpServletRequest request,@NotEmpty String contactId) throws BusinessException {
 		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(request);
-
 		UserContact userContact= userContactService.getUserContactByUserIdAndContactId(tokenUserInfoDto.getUserId(),contactId);
 		if(userContact==null|| !ArraysUtil.contains(new Integer[]{
 				UserContactStatusEnum.FRIEND.getStatus(),
 				UserContactStatusEnum.DEL_BE.getStatus(),
 				UserContactStatusEnum.BLACKLIST_BE.getStatus()
-
 		},userContact.getStatus())){
 			System.out.println(userContact==null);
-
-              throw new BusinessException(ResponseCodeEnum.CODE_600);
+			throw new BusinessException(ResponseCodeEnum.CODE_600);
 		}
-
 		UserInfo userInfo=userInfoService.getUserInfoByUserId(contactId);
 		UserInfoVO userInfoVO= CopyTools.copy(userInfo, UserInfoVO.class);
 		return getSuccessResponseVO(userInfoVO);
 	}
-
-
-
-
 }

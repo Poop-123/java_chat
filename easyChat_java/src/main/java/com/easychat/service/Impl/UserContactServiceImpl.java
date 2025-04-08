@@ -265,7 +265,7 @@ public class UserContactServiceImpl implements UserContactService{
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void addContact4Robot(String userId) {
-          Date curDate=new Date();
+		Date curDate=new Date();
 		SysSettingDto sysSettingDto=redisComponent.getSysSetting();
 		String contactId= sysSettingDto.getRobotUid();
 		String contactName=sysSettingDto.getRobotNickName();

@@ -104,7 +104,7 @@
 				and send_time>=#{query.lastReceiveTime}
 			</if>
 		    <if test="query.contactIdList!=null and query.contactIdList.size()>0 ">
-			    and contact_id in <foreach collection="query.contactIdList" separator="," item="item">#{item}</foreach>
+			    and contact_id in <foreach collection="query.contactIdList" separator="," item="item" open="(" close=")">#{item}</foreach>
 		    </if>
 		</sql>
 		<!--通用条件列-->

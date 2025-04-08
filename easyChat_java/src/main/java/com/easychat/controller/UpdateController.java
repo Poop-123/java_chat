@@ -7,36 +7,27 @@ import com.easychat.entity.po.AppUpdate;
 import com.easychat.entity.vo.AppUpdateVO;
 import com.easychat.entity.vo.ResponseVO;
 import com.easychat.enums.AppUpdateFileTypeEnum;
-import com.easychat.exception.BusinessException;
-import com.easychat.query.AppUpdateQuery;
 import com.easychat.service.AppUpdateService;
 import com.easychat.utils.CopyTools;
 import com.easychat.utils.StringTools;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import javax.annotation.Resource;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
-
 /**
   * @Description:app发布 Service
   * @Author:刘耿豪
   * @Date:2025/03/23
   */
-    @RestController("updateController")
-	@RequestMapping("/update")
-    public class UpdateController extends ABaseController{
-
+@RestController("updateController")
+@RequestMapping("/update")
+public class UpdateController extends ABaseController{
 	@Resource
 	private AppUpdateService appUpdateService;
 	@Resource
 	private AppConfig appConfig;
+	//检查版本
 	@RequestMapping("/checkVersion")
 	@GlobalInterceptor
 	public ResponseVO checkVersion(String appVersion,String uid){
@@ -60,7 +51,4 @@ import java.util.Arrays;
 		appUpdateVO.setFileName(fileName);
 		return getSuccessResponseVO(null);
 	}
-
-
-
 }
