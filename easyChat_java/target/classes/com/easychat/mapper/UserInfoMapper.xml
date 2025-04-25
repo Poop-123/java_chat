@@ -388,43 +388,43 @@
 		UPDATE user_info
 		<set>
 			<if test="bean.userId!=null">
-				user_id={bean.userId},
+				user_id=#{bean.userId},
 			</if>
 			<if test="bean.email!=null">
-				email={bean.email},
+				email=#{bean.email},
 			</if>
 			<if test="bean.nickName!=null">
-				nick_name={bean.nickName},
+				nick_name=#{bean.nickName},
 			</if>
 			<if test="bean.joinType!=null">
-				join_type={bean.joinType},
+				join_type=#{bean.joinType},
 			</if>
 			<if test="bean.sex!=null">
-				sex={bean.sex},
+				sex=#{bean.sex},
 			</if>
 			<if test="bean.password!=null">
-				password={bean.password},
+				password=#{bean.password},
 			</if>
 			<if test="bean.personalSignature!=null">
-				personal_signature={bean.personalSignature},
+				personal_signature=#{bean.personalSignature},
 			</if>
 			<if test="bean.status!=null">
-				status={bean.status},
+				status=#{bean.status},
 			</if>
 			<if test="bean.createTime!=null">
-				create_time={bean.createTime},
+				create_time=#{bean.createTime},
 			</if>
 			<if test="bean.lastLoginTime!=null">
-				last_login_time={bean.lastLoginTime},
+				last_login_time=#{bean.lastLoginTime},
 			</if>
 			<if test="bean.areaName!=null">
-				area_name={bean.areaName},
+				area_name=#{bean.areaName},
 			</if>
 			<if test="bean.areaCode!=null">
-				area_code={bean.areaCode},
+				area_code=#{bean.areaCode},
 			</if>
 			<if test="bean.lastOffTime!=null">
-				last_off_time={bean.lastOffTime},
+				last_off_time=#{bean.lastOffTime},
 			</if>
 		</set>
 		where user_id=#{userId}
