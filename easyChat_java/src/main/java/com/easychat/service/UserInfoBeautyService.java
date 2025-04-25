@@ -1,5 +1,7 @@
 package com.easychat.service;
 
+import com.easychat.exception.BusinessException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import com.easychat.entity.po.UserInfoBeauty;
 import com.easychat.query.UserInfoBeautyQuery;
@@ -8,7 +10,7 @@ import com.easychat.entity.vo.PaginationResultVO;
 /**
   * @Description: Service
   * @Author:刘耿豪
-  * @Date:2025/03/18
+  * @Date:2025/03/23
   */
 public interface UserInfoBeautyService{
 
@@ -43,19 +45,34 @@ public interface UserInfoBeautyService{
 	Integer addOrUpdateBatch(List<UserInfoBeauty> listBean);
 
 	/**
+	 * 根据Id查询对象
+	 */
+	UserInfoBeauty getUserInfoBeautyById(Integer id);
+
+	/**
+	 * 根据Id修改
+	 */
+	Integer updateUserInfoBeautyById(UserInfoBeauty bean,Integer id);
+
+	/**
+	 * 根据Id删除
+	 */
+	Integer deleteUserInfoBeautyById(Integer id);
+
+	/**
 	 * 根据UserId查询对象
 	 */
-	UserInfoBeauty getUserInfoBeautyByUserId(Integer userId);
+	UserInfoBeauty getUserInfoBeautyByUserId(String userId);
 
 	/**
 	 * 根据UserId修改
 	 */
-	Integer updateUserInfoBeautyByUserId(UserInfoBeauty bean,Integer userId);
+	Integer updateUserInfoBeautyByUserId(UserInfoBeauty bean,String userId);
 
 	/**
 	 * 根据UserId删除
 	 */
-	Integer deleteUserInfoBeautyByUserId(Integer userId);
+	Integer deleteUserInfoBeautyByUserId(String userId);
 
 	/**
 	 * 根据Email查询对象
@@ -72,4 +89,5 @@ public interface UserInfoBeautyService{
 	 */
 	Integer deleteUserInfoBeautyByEmail(String email);
 
+	void saveAccount(UserInfoBeauty userInfoBeauty) throws BusinessException;
 }

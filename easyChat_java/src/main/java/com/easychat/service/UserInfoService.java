@@ -1,10 +1,15 @@
 package com.easychat.service;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+
+import com.easychat.dto.TokenUserInfoDto;
 import com.easychat.entity.po.UserInfo;
 import com.easychat.exception.BusinessException;
 import com.easychat.query.UserInfoQuery;
 import com.easychat.entity.vo.PaginationResultVO;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
   * @Description: Service
@@ -75,5 +80,24 @@ public interface UserInfoService{
 	/**
 	 * 注册
 	 */
-	void register(String email,String nickName,String password) throws BusinessException;
+	void register(String email, String nickName, String password) throws BusinessException;
+	/**
+	 * 登录
+	 */
+	TokenUserInfoDto login(String email, String password) throws BusinessException;
+	/**
+	 * 更新个人账户
+	 */
+	void updateUserInfo(UserInfo userInfo, MultipartFile avtarFile,MultipartFile avtarCover) throws IOException;
+
+	/**
+	 * 启用禁用账户
+	 */
+	void updateUserStatus(Integer status,String userId) throws BusinessException;
+	/**
+	 * 强制下线
+	 */
+	void forceOffLine(String userId);
+
+
 }

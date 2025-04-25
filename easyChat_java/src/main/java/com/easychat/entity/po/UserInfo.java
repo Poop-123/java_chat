@@ -2,6 +2,8 @@ package com.easychat.entity.po;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import com.easychat.entity.constants.Constants;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.easychat.enums.DateTimePatternEnum;
@@ -25,7 +27,7 @@ public class UserInfo implements Serializable{
 	 private String email;
 
 	/**
-	 * 
+	 * 昵称
 	 */
 	 private String nickName;
 
@@ -49,11 +51,25 @@ public class UserInfo implements Serializable{
 	 */
 	 private String personalSignature;
 
+	 private Integer onlineType;
 	/**
 	 * 状态
 	 */
-	 @JsonIgnore
+
 	 private Integer status;
+
+	public Integer getOnlineType() {
+		if(lastLoginTime!=null&&lastLoginTime.getTime()>lastOffTime){
+			return Constants.ONE;
+		}else {
+			return Constants.ZERO;
+		}
+
+	}
+
+	public void setOnlineType(Integer onlineType) {
+		this.onlineType = onlineType;
+	}
 
 	/**
 	 * 创建时间

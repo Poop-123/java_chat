@@ -19,6 +19,7 @@ public class RedisUtils<V> {
 
     private  final RedisTemplate<String,V> redisTemplate;
     private static final Logger logger= LoggerFactory.getLogger(RedisTemplate.class);
+
     /**
      * 删除缓存
      * @param key 可以传一个值 或多个

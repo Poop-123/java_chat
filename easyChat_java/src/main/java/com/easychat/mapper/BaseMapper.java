@@ -29,7 +29,7 @@ public interface BaseMapper<T,P> {
     /**
      * selectList:(根据参数查询集合)
      */
-    List<T> selectList(@Param("query") P p);
+    List selectList(@Param("query") P p);
 
     /**
      * selectCount:(根据集合查询数量)

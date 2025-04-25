@@ -1,5 +1,6 @@
 package com.easychat.mapper;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 /**
@@ -7,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
   * @Author:刘耿豪
   * @Date:2025/03/18
   */
+@Mapper
 public interface UserInfoMapper<T,P> extends BaseMapper{
 	/**
 	 * 根据UserId查询
